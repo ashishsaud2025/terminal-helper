@@ -27,8 +27,6 @@ def _edit_distance(a: str, b: str) -> int:
     if a == b:
         return 0
     la, lb = len(a), len(b)
-    if abs(la - lb) > 2:
-        return 3
     d = [[0] * (lb + 1) for _ in range(la + 1)]
     for i in range(la + 1):
         d[i][0] = i
@@ -57,7 +55,7 @@ def split_pipeline(cmdline: str) -> list[str]:
         return []
     if "$(" in s or "`" in s:
         return []
-    if ">" in s:
+    if ">" in s or "<" in s:
         return []
     segments: list[str] = []
     cur: list[str] = []
@@ -147,7 +145,7 @@ def fix_command_typo(cmd: str, known_commands: Container[str]) -> str | None:
         return None
     if any(op in s for op in ("|", "&&", "||", ";")):
         return None
-    if "$(" in s or "`" in s or ">" in s:
+    if "$(" in s or "`" in s or ">" in s or "<" in s:
         return None
     try:
         toks = shlex.split(s, posix=True)
@@ -203,12 +201,12 @@ def check_flags(cmd: str, args: list[str], help_text: str) -> list[Problem]:
         if valid:
             best = None
             best_d = None
-            for v in valid:
+            for v in sorted(valid):
                 d = _edit_distance(flag, v)
                 if best_d is None or d < best_d:
                     best_d = d
                     best = v
-            if best is not None and best_d is not None and best_d <= 4:
+            if best is not None and best_d is not None and best_d <= 2:
                 suggestion = best
         problems.append(Problem(kind="flag", message=f"unknown flag: {flag}", suggestion=suggestion))
     return problems
@@ -219,7 +217,7 @@ def check_paths(args: list[str]) -> list[Problem]:
     for arg in args or []:
         if not isinstance(arg, str):
             continue
-        if arg == "-" or arg.startswith("-"):
+        if arg == "-" or arg == "--" or arg.startswith("-"):
             continue
         if "://" in arg:
             continue
@@ -280,18 +278,18 @@ def _make_danger_list():
     items.append(("Remove-Item -Recurse -Force", "recursive force deletion (PowerShell)", None,
                   lambda c: ("remove-item" in c.lower() and "-recurse" in c.lower() and "-force" in c.lower())))
     items.append(("dd of=/dev/", "raw disk write via dd", None,
-                  lambda c: ("dd" in c.lower().split() or " dd " in (" " + c.lower() + " ")) and "of=/dev/" in c.lower()))
+                  lambda c: any(t == "dd" or t.endswith("/dd") for t in c.lower().split()) and "of=/dev/" in c.lower()))
     items.append(("mkfs", "filesystem format", None,
                   lambda c: bool(re.search(r"\bmkfs\b", c.lower()))))
     items.append(("format", "disk format", None,
                   lambda c: bool(re.search(r"\bformat\b", c.lower()))))
     items.append(("chmod -R", "recursive permission change", None,
-                  lambda c: "chmod" in c.lower() and ("-R" in c or "-r" in c.lower().split() or " -r" in c.lower())))
+                  lambda c: "chmod" in c.lower().split() and any(t.startswith("-") and not t.startswith("--") and "r" in t.lower() for t in c.split())))
     items.append(("> /dev/sd", "write to block device", None,
                   lambda c: bool(re.search(r">\s*/dev/sd", c))))
     items.append(("git push --force", "force push (may overwrite remote history)", "git push --force-with-lease",
                   lambda c: ("git" in c.lower().split() and "push" in c.lower().split()
-                             and ("--force" in c.lower() or " -f" in c.lower() or c.lower().strip().endswith(" -f")))))
+                             and any(t in ("--force", "-f") for t in c.lower().split()))))
     items.append(("DROP TABLE", "destructive SQL drop", None,
                   lambda c: "drop table" in c.lower()))
     items.append(("curl … | sh|bash", "pipe remote script to shell", None,
