@@ -99,7 +99,7 @@
   {
     "name": "find",
     "summary": "Search for files in a directory hierarchy",
-    "description": "Walks a directory tree and filters by name, type, size, and other predicates.",
+    "description": "Walks a directory tree and filters by name, type, size, and other predicates. Use --help for more details.",
     "flags": [
       {
         "flag": "-name",
@@ -315,7 +315,7 @@
   {
     "name": "ssh",
     "summary": "OpenSSH client",
-    "description": "Connects to a remote machine and runs commands or opens an interactive shell.",
+    "description": "Connects to a remote machine and runs commands or opens an interactive shell. Use --help for more details.",
     "flags": [
       {
         "flag": "-p",
@@ -407,7 +407,7 @@
   {
     "name": "python3",
     "summary": "Python 3 interpreter",
-    "description": "Runs Python scripts or starts the interactive interpreter.",
+    "description": "Runs Python scripts or starts the interactive interpreter. Use --help for more details.",
     "flags": [
       {
         "flag": "-c",
@@ -435,7 +435,7 @@
   {
     "name": "pip",
     "summary": "Python package installer",
-    "description": "Installs and manages Python packages from PyPI or other indexes.",
+    "description": "Installs and manages Python packages from PyPI or other indexes. Use --help for more details.",
     "flags": [
       {
         "flag": "install",
@@ -467,7 +467,7 @@
   {
     "name": "docker",
     "summary": "Container runtime",
-    "description": "Builds, runs, and manages containers and images.",
+    "description": "Builds, runs, and manages containers and images. Use --help for more details.",
     "flags": [
       {
         "flag": "run",
@@ -499,7 +499,7 @@
   {
     "name": "kubectl",
     "summary": "Kubernetes command-line tool",
-    "description": "Controls Kubernetes clusters and manages resources.",
+    "description": "Controls Kubernetes clusters and manages resources. Use --help for more details.",
     "flags": [
       {
         "flag": "get",
@@ -567,7 +567,7 @@
   {
     "name": "ps",
     "summary": "Report process status",
-    "description": "Displays information about running processes.",
+    "description": "Displays information about running processes. Use --help for more details.",
     "flags": [
       {
         "flag": "-e",
@@ -623,7 +623,7 @@
   {
     "name": "mkdir",
     "summary": "Create directories",
-    "description": "Creates directories, including parents with -p.",
+    "description": "Creates directories, including parents with -p. Use --help for more details.",
     "flags": [
       {
         "flag": "-p",
@@ -647,7 +647,7 @@
   {
     "name": "touch",
     "summary": "Change file timestamps or create empty files",
-    "description": "Updates access/modification times; creates file if missing.",
+    "description": "Updates access/modification times; creates file if missing. Use --help for more details.",
     "flags": [
       {
         "flag": "-c",
@@ -675,7 +675,7 @@
   {
     "name": "echo",
     "summary": "Print text",
-    "description": "Prints its arguments separated by spaces, followed by a newline.",
+    "description": "Prints its arguments separated by spaces, followed by a newline. Use --help for more details.",
     "flags": [
       {
         "flag": "-n",
@@ -699,7 +699,7 @@
   {
     "name": "sed",
     "summary": "Stream editor",
-    "description": "Filters and transforms text line by line using scripts.",
+    "description": "Filters and transforms text line by line using scripts. Use --help for more details.",
     "flags": [
       {
         "flag": "-i",
@@ -751,7 +751,7 @@
   {
     "name": "head",
     "summary": "Output the first part of files",
-    "description": "Prints the first N lines (default 10) of each file.",
+    "description": "Prints the first N lines (default 10) of each file. Use --help for more details.",
     "flags": [
       {
         "flag": "-n",
@@ -807,7 +807,7 @@
   {
     "name": "wc",
     "summary": "Count lines, words, and bytes",
-    "description": "Counts newlines, words, and bytes in files.",
+    "description": "Counts newlines, words, and bytes in files. Use --help for more details.",
     "flags": [
       {
         "flag": "-l",
@@ -835,12 +835,1907 @@
   {
     "name": "which",
     "summary": "Locate a command in PATH",
-    "description": "Prints the path of the executable that would run for the given command name.",
+    "description": "Prints the path of the executable that would run for the given command name. Use --help for more details.",
     "flags": [],
     "examples": [
       "which bash",
       "which python3",
       "which git"
+    ]
+  },
+  {
+    "name": "sort",
+    "summary": "Sort lines of text files",
+    "description": "Sorts lines in text files. Default order is lexicographic ascending. Use -n for numeric sort.",
+    "flags": [
+      {
+        "flag": "-r",
+        "meaning": "reverse order"
+      },
+      {
+        "flag": "-n",
+        "meaning": "numeric sort"
+      },
+      {
+        "flag": "-u",
+        "meaning": "unique lines"
+      },
+      {
+        "flag": "-k",
+        "meaning": "sort key"
+      },
+      {
+        "flag": "-t",
+        "meaning": "field separator"
+      },
+      {
+        "flag": "-o",
+        "meaning": "output file"
+      }
+    ],
+    "examples": [
+      "sort file.txt",
+      "sort -n numbers.txt",
+      "sort -u list.txt"
+    ]
+  },
+  {
+    "name": "uniq",
+    "summary": "Report or omit repeated lines",
+    "description": "Filters adjacent duplicate lines. Often used after sort. Use -c to count occurrences.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "count occurrences"
+      },
+      {
+        "flag": "-d",
+        "meaning": "duplicates only"
+      },
+      {
+        "flag": "-u",
+        "meaning": "unique only"
+      },
+      {
+        "flag": "-i",
+        "meaning": "ignore case"
+      }
+    ],
+    "examples": [
+      "sort file | uniq",
+      "uniq -c file",
+      "uniq -d file"
+    ]
+  },
+  {
+    "name": "cut",
+    "summary": "Remove sections from each line",
+    "description": "Extracts selected fields or characters from lines. Use -d to set delimiter.",
+    "flags": [
+      {
+        "flag": "-d",
+        "meaning": "delimiter"
+      },
+      {
+        "flag": "-f",
+        "meaning": "fields"
+      },
+      {
+        "flag": "-c",
+        "meaning": "characters"
+      }
+    ],
+    "examples": [
+      "cut -d: -f1 /etc/passwd",
+      "cut -c1-10 file",
+      "cut -d, -f2 data.csv"
+    ]
+  },
+  {
+    "name": "tr",
+    "summary": "Translate or delete characters",
+    "description": "Translates or deletes characters from stdin. Useful for case conversion and cleanup.",
+    "flags": [
+      {
+        "flag": "-d",
+        "meaning": "delete characters"
+      },
+      {
+        "flag": "-s",
+        "meaning": "squeeze repeats"
+      },
+      {
+        "flag": "-c",
+        "meaning": "complement set"
+      }
+    ],
+    "examples": [
+      "tr 'a-z' 'A-Z' < file",
+      "tr -d '\\r' < file",
+      "echo hi | tr ' ' '\\n'"
+    ]
+  },
+  {
+    "name": "tee",
+    "summary": "Read stdin and write to stdout and files",
+    "description": "Copies stdin to stdout and to files. Useful for logging pipelines.",
+    "flags": [
+      {
+        "flag": "-a",
+        "meaning": "append to files"
+      },
+      {
+        "flag": "-i",
+        "meaning": "ignore interrupts"
+      }
+    ],
+    "examples": [
+      "ls | tee out.txt",
+      "cmd | tee -a log.txt"
+    ]
+  },
+  {
+    "name": "xargs",
+    "summary": "Build and execute command lines from stdin",
+    "description": "Reads items from stdin and executes a command with them. Handles large argument lists.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "max args per command"
+      },
+      {
+        "flag": "-I",
+        "meaning": "replace string"
+      },
+      {
+        "flag": "-P",
+        "meaning": "max parallel"
+      },
+      {
+        "flag": "-0",
+        "meaning": "null-delimited input"
+      }
+    ],
+    "examples": [
+      "find . -name '*.tmp' | xargs rm",
+      "echo a b | xargs -n1 echo",
+      "find . -print0 | xargs -0 rm"
+    ]
+  },
+  {
+    "name": "less",
+    "summary": "Pager for viewing text",
+    "description": "Views text one screen at a time. Supports search and follow mode.",
+    "flags": [
+      {
+        "flag": "-N",
+        "meaning": "line numbers"
+      },
+      {
+        "flag": "-S",
+        "meaning": "chop long lines"
+      },
+      {
+        "flag": "+F",
+        "meaning": "follow growth"
+      }
+    ],
+    "examples": [
+      "less file.txt",
+      "less +F /var/log/syslog"
+    ]
+  },
+  {
+    "name": "more",
+    "summary": "File perusal filter",
+    "description": "Displays file contents one screen at a time. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-d",
+        "meaning": "prompt and exit"
+      },
+      {
+        "flag": "-l",
+        "meaning": "ignore formfeeds"
+      }
+    ],
+    "examples": [
+      "more file.txt",
+      "cat big | more"
+    ]
+  },
+  {
+    "name": "diff",
+    "summary": "Compare files line by line",
+    "description": "Shows differences between two files or directories. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-u",
+        "meaning": "unified format"
+      },
+      {
+        "flag": "-r",
+        "meaning": "recursive"
+      },
+      {
+        "flag": "-q",
+        "meaning": "brief"
+      },
+      {
+        "flag": "-w",
+        "meaning": "ignore whitespace"
+      }
+    ],
+    "examples": [
+      "diff a.txt b.txt",
+      "diff -u old new",
+      "diff -r dir1 dir2"
+    ]
+  },
+  {
+    "name": "cmp",
+    "summary": "Compare two files byte by byte",
+    "description": "Compares files and reports first difference. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "verbose bytes"
+      },
+      {
+        "flag": "-s",
+        "meaning": "silent"
+      }
+    ],
+    "examples": [
+      "cmp a b",
+      "cmp -s a b"
+    ]
+  },
+  {
+    "name": "file",
+    "summary": "Determine file type",
+    "description": "Identifies file type by contents. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-b",
+        "meaning": "brief (no filename)"
+      },
+      {
+        "flag": "-L",
+        "meaning": "follow symlinks"
+      }
+    ],
+    "examples": [
+      "file script.sh",
+      "file *"
+    ]
+  },
+  {
+    "name": "stat",
+    "summary": "Display file status",
+    "description": "Shows size, permissions, timestamps and more. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "custom format"
+      },
+      {
+        "flag": "-f",
+        "meaning": "filesystem status"
+      }
+    ],
+    "examples": [
+      "stat file.txt",
+      "stat -c '%s %n' file"
+    ]
+  },
+  {
+    "name": "du",
+    "summary": "Estimate file space usage",
+    "description": "Summarizes disk usage of files and directories. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-h",
+        "meaning": "human-readable"
+      },
+      {
+        "flag": "-s",
+        "meaning": "summarize"
+      },
+      {
+        "flag": "-a",
+        "meaning": "all files"
+      },
+      {
+        "flag": "-d",
+        "meaning": "max depth"
+      }
+    ],
+    "examples": [
+      "du -sh .",
+      "du -h --max-depth=1"
+    ]
+  },
+  {
+    "name": "df",
+    "summary": "Report filesystem disk space usage",
+    "description": "Shows free and used space on mounted filesystems. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-h",
+        "meaning": "human-readable"
+      },
+      {
+        "flag": "-T",
+        "meaning": "print type"
+      },
+      {
+        "flag": "-i",
+        "meaning": "inode usage"
+      }
+    ],
+    "examples": [
+      "df -h",
+      "df -T"
+    ]
+  },
+  {
+    "name": "ln",
+    "summary": "Make links between files",
+    "description": "Creates hard or symbolic links. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-s",
+        "meaning": "symbolic link"
+      },
+      {
+        "flag": "-f",
+        "meaning": "force"
+      },
+      {
+        "flag": "-v",
+        "meaning": "verbose"
+      }
+    ],
+    "examples": [
+      "ln -s target link",
+      "ln file hardlink"
+    ]
+  },
+  {
+    "name": "basename",
+    "summary": "Strip directory and suffix",
+    "description": "Prints the last component of a path. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-a",
+        "meaning": "multiple args"
+      },
+      {
+        "flag": "-s",
+        "meaning": "strip suffix"
+      }
+    ],
+    "examples": [
+      "basename /a/b.txt",
+      "basename /a/b .txt"
+    ]
+  },
+  {
+    "name": "dirname",
+    "summary": "Strip last component from path",
+    "description": "Prints all but the last component of a path. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "dirname /a/b.txt",
+      "dirname /a/b/"
+    ]
+  },
+  {
+    "name": "readlink",
+    "summary": "Print resolved symbolic links",
+    "description": "Resolves symlinks to their target. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-f",
+        "meaning": "canonicalize"
+      },
+      {
+        "flag": "-e",
+        "meaning": "existing only"
+      }
+    ],
+    "examples": [
+      "readlink -f link",
+      "readlink link"
+    ]
+  },
+  {
+    "name": "realpath",
+    "summary": "Print resolved absolute path",
+    "description": "Resolves paths including symlinks. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-e",
+        "meaning": "existing only"
+      },
+      {
+        "flag": "-m",
+        "meaning": "allow missing"
+      }
+    ],
+    "examples": [
+      "realpath file",
+      "realpath ../x"
+    ]
+  },
+  {
+    "name": "rsync",
+    "summary": "Fast incremental file transfer",
+    "description": "Copies files locally or remotely with delta transfer. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-a",
+        "meaning": "archive mode"
+      },
+      {
+        "flag": "-v",
+        "meaning": "verbose"
+      },
+      {
+        "flag": "-z",
+        "meaning": "compress"
+      },
+      {
+        "flag": "--delete",
+        "meaning": "delete extraneous"
+      }
+    ],
+    "examples": [
+      "rsync -av src/ dst/",
+      "rsync -az --delete src/ host:dst/"
+    ]
+  },
+  {
+    "name": "scp",
+    "summary": "Secure copy over SSH",
+    "description": "Copies files between hosts over SSH. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-P",
+        "meaning": "port"
+      },
+      {
+        "flag": "-r",
+        "meaning": "recursive"
+      },
+      {
+        "flag": "-i",
+        "meaning": "identity file"
+      }
+    ],
+    "examples": [
+      "scp file user@host:/tmp",
+      "scp -r dir host:/tmp"
+    ]
+  },
+  {
+    "name": "wget",
+    "summary": "Non-interactive network downloader",
+    "description": "Downloads files from the web. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-O",
+        "meaning": "output file"
+      },
+      {
+        "flag": "-q",
+        "meaning": "quiet"
+      },
+      {
+        "flag": "-c",
+        "meaning": "continue"
+      },
+      {
+        "flag": "--limit-rate",
+        "meaning": "limit speed"
+      }
+    ],
+    "examples": [
+      "wget https://example.com/file",
+      "wget -O out.html url"
+    ]
+  },
+  {
+    "name": "zip",
+    "summary": "Package and compress files",
+    "description": "Creates zip archives. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-r",
+        "meaning": "recursive"
+      },
+      {
+        "flag": "-q",
+        "meaning": "quiet"
+      },
+      {
+        "flag": "-9",
+        "meaning": "best compression"
+      }
+    ],
+    "examples": [
+      "zip -r archive.zip dir/",
+      "zip archive.zip file"
+    ]
+  },
+  {
+    "name": "unzip",
+    "summary": "Extract zip archives",
+    "description": "Lists or extracts zip archive contents. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "list"
+      },
+      {
+        "flag": "-o",
+        "meaning": "overwrite"
+      },
+      {
+        "flag": "-d",
+        "meaning": "destination dir"
+      }
+    ],
+    "examples": [
+      "unzip archive.zip",
+      "unzip -l archive.zip"
+    ]
+  },
+  {
+    "name": "gzip",
+    "summary": "Compress files",
+    "description": "Compresses files using gzip. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-k",
+        "meaning": "keep input"
+      },
+      {
+        "flag": "-d",
+        "meaning": "decompress"
+      },
+      {
+        "flag": "-9",
+        "meaning": "best compression"
+      }
+    ],
+    "examples": [
+      "gzip file.txt",
+      "gzip -k file.txt"
+    ]
+  },
+  {
+    "name": "gunzip",
+    "summary": "Decompress gzip files",
+    "description": "Decompresses .gz files.",
+    "flags": [],
+    "examples": [
+      "gunzip file.txt.gz"
+    ]
+  },
+  {
+    "name": "bzip2",
+    "summary": "Compress files with bzip2",
+    "description": "Compresses files using bzip2. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-k",
+        "meaning": "keep input"
+      },
+      {
+        "flag": "-d",
+        "meaning": "decompress"
+      },
+      {
+        "flag": "-9",
+        "meaning": "best compression"
+      }
+    ],
+    "examples": [
+      "bzip2 file.txt",
+      "bzip2 -d file.txt.bz2"
+    ]
+  },
+  {
+    "name": "xz",
+    "summary": "Compress files with xz",
+    "description": "Compresses files using xz. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-k",
+        "meaning": "keep input"
+      },
+      {
+        "flag": "-d",
+        "meaning": "decompress"
+      },
+      {
+        "flag": "-9",
+        "meaning": "best compression"
+      }
+    ],
+    "examples": [
+      "xz file.txt",
+      "xz -d file.txt.xz"
+    ]
+  },
+  {
+    "name": "sha256sum",
+    "summary": "Compute SHA-256 checksums",
+    "description": "Computes or checks SHA-256 checksums. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "check file"
+      }
+    ],
+    "examples": [
+      "sha256sum file",
+      "sha256sum -c checksums.txt"
+    ]
+  },
+  {
+    "name": "md5sum",
+    "summary": "Compute MD5 checksums",
+    "description": "Computes or checks MD5 checksums. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "check file"
+      }
+    ],
+    "examples": [
+      "md5sum file",
+      "md5sum -c checksums.txt"
+    ]
+  },
+  {
+    "name": "base64",
+    "summary": "Encode or decode base64",
+    "description": "Encodes or decodes base64 data. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-d",
+        "meaning": "decode"
+      },
+      {
+        "flag": "-w",
+        "meaning": "wrap columns"
+      }
+    ],
+    "examples": [
+      "base64 file",
+      "echo hi | base64",
+      "base64 -d file.b64"
+    ]
+  },
+  {
+    "name": "od",
+    "summary": "Dump files in octal or other formats",
+    "description": "Displays file contents in octal, hex, or characters. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-A",
+        "meaning": "address radix"
+      },
+      {
+        "flag": "-t",
+        "meaning": "type"
+      }
+    ],
+    "examples": [
+      "od -c file",
+      "od -An -tx1 file"
+    ]
+  },
+  {
+    "name": "xxd",
+    "summary": "Make a hex dump",
+    "description": "Creates a hex dump or reverses it. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "length"
+      },
+      {
+        "flag": "-s",
+        "meaning": "seek"
+      },
+      {
+        "flag": "-r",
+        "meaning": "revert"
+      }
+    ],
+    "examples": [
+      "xxd file",
+      "xxd -l 64 file"
+    ]
+  },
+  {
+    "name": "hexdump",
+    "summary": "Display file contents in hex",
+    "description": "Displays file in hex, decimal, or other formats. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-C",
+        "meaning": "canonical hex+ASCII"
+      },
+      {
+        "flag": "-n",
+        "meaning": "length"
+      }
+    ],
+    "examples": [
+      "hexdump -C file",
+      "hexdump -n 64 file"
+    ]
+  },
+  {
+    "name": "top",
+    "summary": "Display Linux tasks",
+    "description": "Shows running processes and system resource usage. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-b",
+        "meaning": "batch mode"
+      },
+      {
+        "flag": "-n",
+        "meaning": "iterations"
+      },
+      {
+        "flag": "-p",
+        "meaning": "pid"
+      }
+    ],
+    "examples": [
+      "top",
+      "top -b -n1"
+    ]
+  },
+  {
+    "name": "htop",
+    "summary": "Interactive process viewer",
+    "description": "Interactive process viewer with color and scrolling. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "htop"
+    ]
+  },
+  {
+    "name": "pgrep",
+    "summary": "Look up processes by name",
+    "description": "Finds processes matching a pattern. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-a",
+        "meaning": "full command line"
+      },
+      {
+        "flag": "-f",
+        "meaning": "match full cmd"
+      },
+      {
+        "flag": "-l",
+        "meaning": "list names"
+      }
+    ],
+    "examples": [
+      "pgrep python",
+      "pgrep -af nginx"
+    ]
+  },
+  {
+    "name": "pkill",
+    "summary": "Signal processes by name",
+    "description": "Sends a signal to processes matching a pattern. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-f",
+        "meaning": "match full cmd"
+      },
+      {
+        "flag": "-9",
+        "meaning": "SIGKILL"
+      }
+    ],
+    "examples": [
+      "pkill -f script.py",
+      "pkill -9 name"
+    ]
+  },
+  {
+    "name": "nice",
+    "summary": "Run with modified scheduling priority",
+    "description": "Runs a command with altered niceness. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "niceness value"
+      }
+    ],
+    "examples": [
+      "nice -n 10 cmd",
+      "nice -n -5 cmd"
+    ]
+  },
+  {
+    "name": "nohup",
+    "summary": "Run command immune to hangups",
+    "description": "Runs a command immune to hangups, with output redirected. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "nohup long-task &",
+      "nohup cmd > out.log 2>&1 &"
+    ]
+  },
+  {
+    "name": "time",
+    "summary": "Time a command",
+    "description": "Measures elapsed, user, and system time. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "time ls",
+      "/usr/bin/time -v cmd"
+    ]
+  },
+  {
+    "name": "timeout",
+    "summary": "Run command with time limit",
+    "description": "Runs a command with a time limit, killing if exceeded. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-k",
+        "meaning": "kill after"
+      },
+      {
+        "flag": "-s",
+        "meaning": "signal"
+      }
+    ],
+    "examples": [
+      "timeout 30s cmd",
+      "timeout -k 5 10 cmd"
+    ]
+  },
+  {
+    "name": "watch",
+    "summary": "Execute a program periodically",
+    "description": "Runs a command repeatedly and shows output. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "interval seconds"
+      },
+      {
+        "flag": "-d",
+        "meaning": "highlight changes"
+      },
+      {
+        "flag": "-t",
+        "meaning": "no header"
+      }
+    ],
+    "examples": [
+      "watch -n 1 date",
+      "watch -d ls"
+    ]
+  },
+  {
+    "name": "ping",
+    "summary": "Send ICMP echo requests",
+    "description": "Tests network connectivity to a host. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "count"
+      },
+      {
+        "flag": "-i",
+        "meaning": "interval"
+      },
+      {
+        "flag": "-s",
+        "meaning": "packet size"
+      }
+    ],
+    "examples": [
+      "ping -c 4 google.com",
+      "ping -i 0.5 host"
+    ]
+  },
+  {
+    "name": "ss",
+    "summary": "Socket statistics",
+    "description": "Displays socket and connection information. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-t",
+        "meaning": "TCP"
+      },
+      {
+        "flag": "-u",
+        "meaning": "UDP"
+      },
+      {
+        "flag": "-l",
+        "meaning": "listening"
+      },
+      {
+        "flag": "-n",
+        "meaning": "numeric"
+      },
+      {
+        "flag": "-p",
+        "meaning": "processes"
+      }
+    ],
+    "examples": [
+      "ss -tulnp",
+      "ss -tn"
+    ]
+  },
+  {
+    "name": "ip",
+    "summary": "Show or manipulate network interfaces",
+    "description": "Manages IP addresses, routes, and links. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "addr",
+        "meaning": "address"
+      },
+      {
+        "flag": "-link",
+        "meaning": "link"
+      },
+      {
+        "flag": "route",
+        "meaning": "routing table"
+      }
+    ],
+    "examples": [
+      "ip addr",
+      "ip route",
+      "ip link"
+    ]
+  },
+  {
+    "name": "ifconfig",
+    "summary": "Configure network interface",
+    "description": "Displays or configures network interfaces. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "ifconfig",
+      "ifconfig eth0 up"
+    ]
+  },
+  {
+    "name": "nc",
+    "summary": "Netcat networking utility",
+    "description": "Reads and writes data across network connections. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "listen mode"
+      },
+      {
+        "flag": "-p",
+        "meaning": "port"
+      },
+      {
+        "flag": "-v",
+        "meaning": "verbose"
+      },
+      {
+        "flag": "-z",
+        "meaning": "scan ports"
+      }
+    ],
+    "examples": [
+      "nc -zv host 80",
+      "nc -l 1234"
+    ]
+  },
+  {
+    "name": "dig",
+    "summary": "DNS lookup utility",
+    "description": "Queries DNS name servers. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "+short",
+        "meaning": "short answer"
+      },
+      {
+        "flag": "@server",
+        "meaning": "query server"
+      }
+    ],
+    "examples": [
+      "dig example.com",
+      "dig +short example.com"
+    ]
+  },
+  {
+    "name": "nslookup",
+    "summary": "Query DNS name servers",
+    "description": "Queries DNS for a name or IP. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "nslookup example.com",
+      "nslookup 8.8.8.8"
+    ]
+  },
+  {
+    "name": "host",
+    "summary": "DNS lookup utility",
+    "description": "Performs DNS lookups for a name. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "host example.com",
+      "host 8.8.8.8"
+    ]
+  },
+  {
+    "name": "uname",
+    "summary": "Print system information",
+    "description": "Prints kernel and system information. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-a",
+        "meaning": "all info"
+      },
+      {
+        "flag": "-r",
+        "meaning": "kernel release"
+      },
+      {
+        "flag": "-m",
+        "meaning": "machine"
+      }
+    ],
+    "examples": [
+      "uname -a",
+      "uname -r"
+    ]
+  },
+  {
+    "name": "hostname",
+    "summary": "Show or set system hostname",
+    "description": "Prints or sets the system hostname. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-I",
+        "meaning": "IP addresses"
+      },
+      {
+        "flag": "-f",
+        "meaning": "FQDN"
+      }
+    ],
+    "examples": [
+      "hostname",
+      "hostname -I"
+    ]
+  },
+  {
+    "name": "whoami",
+    "summary": "Print current user name",
+    "description": "Prints the effective user name. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "whoami"
+    ]
+  },
+  {
+    "name": "id",
+    "summary": "Print user and group IDs",
+    "description": "Prints real and effective IDs. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-u",
+        "meaning": "user ID"
+      },
+      {
+        "flag": "-g",
+        "meaning": "group ID"
+      },
+      {
+        "flag": "-G",
+        "meaning": "all groups"
+      }
+    ],
+    "examples": [
+      "id",
+      "id -u",
+      "id -G"
+    ]
+  },
+  {
+    "name": "who",
+    "summary": "Show logged-in users",
+    "description": "Shows who is logged in. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-b",
+        "meaning": "last boot"
+      },
+      {
+        "flag": "-q",
+        "meaning": "short"
+      }
+    ],
+    "examples": [
+      "who",
+      "who -b"
+    ]
+  },
+  {
+    "name": "uptime",
+    "summary": "Show uptime and load",
+    "description": "Shows how long system has been running. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "uptime"
+    ]
+  },
+  {
+    "name": "date",
+    "summary": "Print or set date and time",
+    "description": "Prints or sets the system date/time. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-d",
+        "meaning": "parse date string"
+      },
+      {
+        "flag": "+FORMAT",
+        "meaning": "output format"
+      }
+    ],
+    "examples": [
+      "date",
+      "date '+%Y-%m-%d'",
+      "date -d 'yesterday'"
+    ]
+  },
+  {
+    "name": "free",
+    "summary": "Display memory usage",
+    "description": "Shows free and used memory. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-h",
+        "meaning": "human-readable"
+      },
+      {
+        "flag": "-m",
+        "meaning": "megabytes"
+      }
+    ],
+    "examples": [
+      "free -h",
+      "free -m"
+    ]
+  },
+  {
+    "name": "journalctl",
+    "summary": "Query systemd journal",
+    "description": "Views and filters systemd journal logs. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-u",
+        "meaning": "unit"
+      },
+      {
+        "flag": "-f",
+        "meaning": "follow"
+      },
+      {
+        "flag": "-n",
+        "meaning": "lines"
+      },
+      {
+        "flag": "--since",
+        "meaning": "time filter"
+      }
+    ],
+    "examples": [
+      "journalctl -u nginx",
+      "journalctl -f",
+      "journalctl -n 50"
+    ]
+  },
+  {
+    "name": "dmesg",
+    "summary": "Print kernel ring buffer",
+    "description": "Displays kernel messages. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-T",
+        "meaning": "readable timestamps"
+      },
+      {
+        "flag": "-w",
+        "meaning": "follow"
+      }
+    ],
+    "examples": [
+      "dmesg | tail",
+      "dmesg -T"
+    ]
+  },
+  {
+    "name": "lsblk",
+    "summary": "List block devices",
+    "description": "Lists information about block devices. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-f",
+        "meaning": "filesystems"
+      },
+      {
+        "flag": "-o",
+        "meaning": "output columns"
+      }
+    ],
+    "examples": [
+      "lsblk",
+      "lsblk -f"
+    ]
+  },
+  {
+    "name": "mount",
+    "summary": "Mount a filesystem",
+    "description": "Mounts or displays mounted filesystems. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-t",
+        "meaning": "filesystem type"
+      },
+      {
+        "flag": "-o",
+        "meaning": "options"
+      }
+    ],
+    "examples": [
+      "mount",
+      "sudo mount /dev/sdb1 /mnt"
+    ]
+  },
+  {
+    "name": "apt",
+    "summary": "Debian package manager",
+    "description": "Manages packages on Debian/Ubuntu systems. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "update",
+        "meaning": "refresh index"
+      },
+      {
+        "flag": "install",
+        "meaning": "install packages"
+      },
+      {
+        "flag": "remove",
+        "meaning": "remove packages"
+      },
+      {
+        "flag": "search",
+        "meaning": "search packages"
+      }
+    ],
+    "examples": [
+      "sudo apt update",
+      "sudo apt install nginx",
+      "apt search foo"
+    ]
+  },
+  {
+    "name": "apt-get",
+    "summary": "APT package handling utility",
+    "description": "Lower-level package management for Debian/Ubuntu. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "update",
+        "meaning": "refresh index"
+      },
+      {
+        "flag": "install",
+        "meaning": "install"
+      },
+      {
+        "flag": "upgrade",
+        "meaning": "upgrade all"
+      }
+    ],
+    "examples": [
+      "sudo apt-get update",
+      "sudo apt-get install -y nginx"
+    ]
+  },
+  {
+    "name": "yum",
+    "summary": "RPM package manager (RHEL)",
+    "description": "Manages packages on RHEL/CentOS. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "install",
+        "meaning": "install"
+      },
+      {
+        "flag": "remove",
+        "meaning": "remove"
+      },
+      {
+        "flag": "update",
+        "meaning": "update all"
+      }
+    ],
+    "examples": [
+      "sudo yum install nginx",
+      "sudo yum update"
+    ]
+  },
+  {
+    "name": "dnf",
+    "summary": "Package manager (Fedora)",
+    "description": "Manages packages on Fedora/RHEL 8+. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "install",
+        "meaning": "install"
+      },
+      {
+        "flag": "remove",
+        "meaning": "remove"
+      },
+      {
+        "flag": "update",
+        "meaning": "update all"
+      }
+    ],
+    "examples": [
+      "sudo dnf install nginx",
+      "sudo dnf upgrade"
+    ]
+  },
+  {
+    "name": "pacman",
+    "summary": "Arch Linux package manager",
+    "description": "Manages packages on Arch Linux. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-S",
+        "meaning": "install"
+      },
+      {
+        "flag": "-R",
+        "meaning": "remove"
+      },
+      {
+        "flag": "-Syu",
+        "meaning": "sync and upgrade"
+      }
+    ],
+    "examples": [
+      "sudo pacman -Syu",
+      "sudo pacman -S nginx"
+    ]
+  },
+  {
+    "name": "node",
+    "summary": "JavaScript runtime",
+    "description": "Runs JavaScript code outside the browser. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-e",
+        "meaning": "eval code"
+      },
+      {
+        "flag": "-p",
+        "meaning": "print result"
+      },
+      {
+        "flag": "--version",
+        "meaning": "version"
+      }
+    ],
+    "examples": [
+      "node script.js",
+      "node -e 'console.log(1)'"
+    ]
+  },
+  {
+    "name": "npm",
+    "summary": "Node package manager",
+    "description": "Manages Node.js packages and scripts.",
+    "flags": [
+      {
+        "flag": "install",
+        "meaning": "install deps"
+      },
+      {
+        "flag": "run",
+        "meaning": "run script"
+      },
+      {
+        "flag": "init",
+        "meaning": "create package"
+      },
+      {
+        "flag": "test",
+        "meaning": "run tests"
+      }
+    ],
+    "examples": [
+      "npm install",
+      "npm run build",
+      "npm init -y"
+    ]
+  },
+  {
+    "name": "npx",
+    "summary": "Execute npm packages",
+    "description": "Runs npm package binaries without global install. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "npx create-react-app app",
+      "npx eslint ."
+    ]
+  },
+  {
+    "name": "yarn",
+    "summary": "Package manager for JavaScript",
+    "description": "Installs and manages JS dependencies. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "install",
+        "meaning": "install"
+      },
+      {
+        "flag": "build",
+        "meaning": "run build"
+      },
+      {
+        "flag": "add",
+        "meaning": "add dep"
+      }
+    ],
+    "examples": [
+      "yarn install",
+      "yarn build",
+      "yarn add react"
+    ]
+  },
+  {
+    "name": "pnpm",
+    "summary": "Fast, disk-efficient package manager",
+    "description": "Manages JS packages with content-addressable store. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "install",
+        "meaning": "install"
+      },
+      {
+        "flag": "dev",
+        "meaning": "dev server"
+      },
+      {
+        "flag": "add",
+        "meaning": "add dep"
+      }
+    ],
+    "examples": [
+      "pnpm install",
+      "pnpm dev",
+      "pnpm add lodash"
+    ]
+  },
+  {
+    "name": "make",
+    "summary": "Build automation tool",
+    "description": "Builds targets from a Makefile. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-j",
+        "meaning": "parallel jobs"
+      },
+      {
+        "flag": "-f",
+        "meaning": "makefile"
+      },
+      {
+        "flag": "-C",
+        "meaning": "change dir"
+      }
+    ],
+    "examples": [
+      "make",
+      "make -j4",
+      "make clean"
+    ]
+  },
+  {
+    "name": "cmake",
+    "summary": "Cross-platform build system",
+    "description": "Configures and builds projects. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-S",
+        "meaning": "source dir"
+      },
+      {
+        "flag": "-B",
+        "meaning": "build dir"
+      },
+      {
+        "flag": "--build",
+        "meaning": "build"
+      }
+    ],
+    "examples": [
+      "cmake -S . -B build",
+      "cmake --build build"
+    ]
+  },
+  {
+    "name": "gcc",
+    "summary": "C compiler",
+    "description": "Compiles C programs. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-o",
+        "meaning": "output file"
+      },
+      {
+        "flag": "-Wall",
+        "meaning": "all warnings"
+      },
+      {
+        "flag": "-O2",
+        "meaning": "optimize"
+      }
+    ],
+    "examples": [
+      "gcc main.c -o main",
+      "gcc -Wall -O2 main.c -o main"
+    ]
+  },
+  {
+    "name": "go",
+    "summary": "Go toolchain",
+    "description": "Builds and runs Go programs. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "build",
+        "meaning": "build"
+      },
+      {
+        "flag": "run",
+        "meaning": "run"
+      },
+      {
+        "flag": "test",
+        "meaning": "test"
+      },
+      {
+        "flag": "mod",
+        "meaning": "module mgmt"
+      }
+    ],
+    "examples": [
+      "go run main.go",
+      "go build ./...",
+      "go test ./..."
+    ]
+  },
+  {
+    "name": "cargo",
+    "summary": "Rust package manager",
+    "description": "Builds and manages Rust projects. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "build",
+        "meaning": "build"
+      },
+      {
+        "flag": "run",
+        "meaning": "run"
+      },
+      {
+        "flag": "test",
+        "meaning": "test"
+      },
+      {
+        "flag": "new",
+        "meaning": "new project"
+      }
+    ],
+    "examples": [
+      "cargo build",
+      "cargo run",
+      "cargo test"
+    ]
+  },
+  {
+    "name": "java",
+    "summary": "Java runtime",
+    "description": "Runs Java applications. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-jar",
+        "meaning": "jar file"
+      },
+      {
+        "flag": "-cp",
+        "meaning": "classpath"
+      }
+    ],
+    "examples": [
+      "java -jar app.jar",
+      "java Main"
+    ]
+  },
+  {
+    "name": "javac",
+    "summary": "Java compiler",
+    "description": "Compiles Java source files. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-d",
+        "meaning": "destination dir"
+      },
+      {
+        "flag": "-cp",
+        "meaning": "classpath"
+      }
+    ],
+    "examples": [
+      "javac Main.java",
+      "javac -d out src/*.java"
+    ]
+  },
+  {
+    "name": "psql",
+    "summary": "PostgreSQL interactive terminal",
+    "description": "Connects to PostgreSQL databases. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-U",
+        "meaning": "user"
+      },
+      {
+        "flag": "-d",
+        "meaning": "database"
+      },
+      {
+        "flag": "-c",
+        "meaning": "command"
+      },
+      {
+        "flag": "-f",
+        "meaning": "file"
+      }
+    ],
+    "examples": [
+      "psql -U postgres -d mydb",
+      "psql -c 'SELECT 1'"
+    ]
+  },
+  {
+    "name": "redis-cli",
+    "summary": "Redis command-line interface",
+    "description": "Interacts with Redis servers. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-h",
+        "meaning": "host"
+      },
+      {
+        "flag": "-p",
+        "meaning": "port"
+      },
+      {
+        "flag": "-a",
+        "meaning": "password"
+      }
+    ],
+    "examples": [
+      "redis-cli",
+      "redis-cli -h host PING"
+    ]
+  },
+  {
+    "name": "sqlite3",
+    "summary": "SQLite command-line tool",
+    "description": "Interacts with SQLite databases. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "sqlite3 db.sqlite",
+      "sqlite3 db '.tables'"
+    ]
+  },
+  {
+    "name": "tmux",
+    "summary": "Terminal multiplexer",
+    "description": "Manages multiple terminal sessions. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "new-session",
+        "meaning": "new session"
+      },
+      {
+        "flag": "attach",
+        "meaning": "attach"
+      },
+      {
+        "flag": "list-sessions",
+        "meaning": "list"
+      }
+    ],
+    "examples": [
+      "tmux new -s dev",
+      "tmux attach -t dev",
+      "tmux ls"
+    ]
+  },
+  {
+    "name": "jq",
+    "summary": "JSON processor",
+    "description": "Filters and transforms JSON on the command line. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-r",
+        "meaning": "raw output"
+      },
+      {
+        "flag": "-c",
+        "meaning": "compact"
+      },
+      {
+        "flag": ".",
+        "meaning": "identity filter"
+      }
+    ],
+    "examples": [
+      "jq '.' file.json",
+      "jq -r '.name' file.json"
+    ]
+  },
+  {
+    "name": "tree",
+    "summary": "List directory tree",
+    "description": "Displays directory contents as a tree. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-L",
+        "meaning": "max depth"
+      },
+      {
+        "flag": "-a",
+        "meaning": "all files"
+      },
+      {
+        "flag": "-d",
+        "meaning": "directories only"
+      }
+    ],
+    "examples": [
+      "tree",
+      "tree -L 2"
+    ]
+  },
+  {
+    "name": "man",
+    "summary": "Display manual pages",
+    "description": "Shows manual pages for commands. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-k",
+        "meaning": "search keywords"
+      }
+    ],
+    "examples": [
+      "man ls",
+      "man -k copy"
+    ]
+  },
+  {
+    "name": "clear",
+    "summary": "Clear the terminal screen",
+    "description": "Clears the terminal display. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "clear"
+    ]
+  },
+  {
+    "name": "history",
+    "summary": "Command history",
+    "description": "Displays or manages shell history. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "history",
+      "history | tail"
+    ]
+  },
+  {
+    "name": "env",
+    "summary": "Print or set environment",
+    "description": "Prints environment or runs command with env. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-i",
+        "meaning": "start with empty env"
+      }
+    ],
+    "examples": [
+      "env",
+      "env VAR=val cmd"
+    ]
+  },
+  {
+    "name": "export",
+    "summary": "Set environment variable",
+    "description": "Marks variables for export to child processes. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "export PATH=$PATH:/opt",
+      "export FOO=bar"
+    ]
+  },
+  {
+    "name": "alias",
+    "summary": "Define command alias",
+    "description": "Creates shell command aliases. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "alias ll='ls -la'",
+      "alias gs='git status'"
+    ]
+  },
+  {
+    "name": "source",
+    "summary": "Execute commands from file",
+    "description": "Reads and executes commands from a file. Use --help for more details.",
+    "flags": [],
+    "examples": [
+      "source ~/.bashrc",
+      "source script.sh"
+    ]
+  },
+  {
+    "name": "crontab",
+    "summary": "Schedule cron jobs",
+    "description": "Edits or lists cron jobs. Use --help for more details.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "list"
+      },
+      {
+        "flag": "-e",
+        "meaning": "edit"
+      },
+      {
+        "flag": "-r",
+        "meaning": "remove"
+      }
+    ],
+    "examples": [
+      "crontab -l",
+      "crontab -e"
     ]
   }
 ]
