@@ -1,0 +1,846 @@
+[
+  {
+    "name": "git",
+    "summary": "Distributed version control system",
+    "description": "Tracks changes in source code and coordinates work between multiple developers. Use subcommands like status, add, commit, push, pull.",
+    "flags": [
+      {
+        "flag": "-C <path>",
+        "meaning": "run as if git was started in <path>"
+      },
+      {
+        "flag": "--version",
+        "meaning": "show version"
+      },
+      {
+        "flag": "-c <name>=<value>",
+        "meaning": "override config"
+      }
+    ],
+    "examples": [
+      "git status",
+      "git add -A",
+      "git commit -m 'msg'",
+      "git push origin main"
+    ]
+  },
+  {
+    "name": "ls",
+    "summary": "List directory contents",
+    "description": "Shows files and directories in the current or given path. Common options control formatting and sorting.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "long listing format"
+      },
+      {
+        "flag": "-a",
+        "meaning": "include hidden files"
+      },
+      {
+        "flag": "-h",
+        "meaning": "human-readable sizes"
+      },
+      {
+        "flag": "-R",
+        "meaning": "recurse"
+      }
+    ],
+    "examples": [
+      "ls",
+      "ls -la",
+      "ls -lh /tmp"
+    ]
+  },
+  {
+    "name": "cd",
+    "summary": "Change the shell working directory",
+    "description": "Changes the current directory. With no argument, goes to the home directory.",
+    "flags": [],
+    "examples": [
+      "cd /tmp",
+      "cd ..",
+      "cd -",
+      "cd ~"
+    ]
+  },
+  {
+    "name": "grep",
+    "summary": "Search text patterns in files",
+    "description": "Prints lines matching a pattern. Supports regular expressions and recursive search.",
+    "flags": [
+      {
+        "flag": "-i",
+        "meaning": "ignore case"
+      },
+      {
+        "flag": "-r",
+        "meaning": "recursive"
+      },
+      {
+        "flag": "-n",
+        "meaning": "line numbers"
+      },
+      {
+        "flag": "-v",
+        "meaning": "invert match"
+      },
+      {
+        "flag": "-E",
+        "meaning": "extended regex"
+      }
+    ],
+    "examples": [
+      "grep -rn 'TODO' .",
+      "grep -i 'error' log.txt",
+      "grep -v '^#' file"
+    ]
+  },
+  {
+    "name": "find",
+    "summary": "Search for files in a directory hierarchy",
+    "description": "Walks a directory tree and filters by name, type, size, and other predicates.",
+    "flags": [
+      {
+        "flag": "-name",
+        "meaning": "match basename pattern"
+      },
+      {
+        "flag": "-type f",
+        "meaning": "files only"
+      },
+      {
+        "flag": "-mtime",
+        "meaning": "modified time"
+      },
+      {
+        "flag": "-exec",
+        "meaning": "run command on results"
+      },
+      {
+        "flag": "-print",
+        "meaning": "print matches"
+      }
+    ],
+    "examples": [
+      "find . -name '*.py'",
+      "find /tmp -type f -mtime -1",
+      "find . -name '*.log' -delete"
+    ]
+  },
+  {
+    "name": "rm",
+    "summary": "Remove files or directories",
+    "description": "Deletes files. Use -r to remove directories recursively and -f to force without prompting.",
+    "flags": [
+      {
+        "flag": "-f",
+        "meaning": "force, never prompt"
+      },
+      {
+        "flag": "-r, -R",
+        "meaning": "remove directories recursively"
+      },
+      {
+        "flag": "-i",
+        "meaning": "prompt before removal"
+      },
+      {
+        "flag": "-v",
+        "meaning": "explain actions"
+      }
+    ],
+    "examples": [
+      "rm file.txt",
+      "rm -rf build/",
+      "rm -i *.tmp"
+    ]
+  },
+  {
+    "name": "mv",
+    "summary": "Move or rename files",
+    "description": "Moves or renames files and directories. Overwrites destination by default.",
+    "flags": [
+      {
+        "flag": "-i",
+        "meaning": "prompt before overwrite"
+      },
+      {
+        "flag": "-f",
+        "meaning": "force overwrite"
+      },
+      {
+        "flag": "-v",
+        "meaning": "explain actions"
+      },
+      {
+        "flag": "-n",
+        "meaning": "do not overwrite"
+      }
+    ],
+    "examples": [
+      "mv a.txt b.txt",
+      "mv *.log archive/",
+      "mv -i src dest"
+    ]
+  },
+  {
+    "name": "cp",
+    "summary": "Copy files and directories",
+    "description": "Copies files or directories. Use -r for recursive copy of directories.",
+    "flags": [
+      {
+        "flag": "-r, -R",
+        "meaning": "copy directories recursively"
+      },
+      {
+        "flag": "-i",
+        "meaning": "prompt before overwrite"
+      },
+      {
+        "flag": "-v",
+        "meaning": "explain"
+      },
+      {
+        "flag": "-p",
+        "meaning": "preserve mode/ownership/timestamps"
+      }
+    ],
+    "examples": [
+      "cp a.txt b.txt",
+      "cp -r src/ dst/",
+      "cp -p file backup"
+    ]
+  },
+  {
+    "name": "cat",
+    "summary": "Concatenate and print files",
+    "description": "Prints file contents to stdout. Also useful for concatenating multiple files.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "number all output lines"
+      },
+      {
+        "flag": "-b",
+        "meaning": "number nonblank lines"
+      },
+      {
+        "flag": "-s",
+        "meaning": "squeeze repeated blank lines"
+      },
+      {
+        "flag": "-A",
+        "meaning": "show nonprinting"
+      }
+    ],
+    "examples": [
+      "cat file.txt",
+      "cat -n script.sh",
+      "cat a.txt b.txt > out.txt"
+    ]
+  },
+  {
+    "name": "tar",
+    "summary": "Archive files",
+    "description": "Creates, lists, or extracts tar archives. Common modes: create, extract, list.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "create archive"
+      },
+      {
+        "flag": "-x",
+        "meaning": "extract archive"
+      },
+      {
+        "flag": "-t",
+        "meaning": "list contents"
+      },
+      {
+        "flag": "-f",
+        "meaning": "archive file"
+      },
+      {
+        "flag": "-z",
+        "meaning": "gzip"
+      },
+      {
+        "flag": "-v",
+        "meaning": "verbose"
+      }
+    ],
+    "examples": [
+      "tar -cf archive.tar files/",
+      "tar -xzf archive.tar.gz",
+      "tar -tvf archive.tar"
+    ]
+  },
+  {
+    "name": "curl",
+    "summary": "Transfer data from or to a server",
+    "description": "Downloads or uploads data over HTTP and other protocols. Prints body to stdout by default.",
+    "flags": [
+      {
+        "flag": "-o",
+        "meaning": "write output to file"
+      },
+      {
+        "flag": "-O",
+        "meaning": "save with remote filename"
+      },
+      {
+        "flag": "-s",
+        "meaning": "silent"
+      },
+      {
+        "flag": "-L",
+        "meaning": "follow redirects"
+      },
+      {
+        "flag": "-d",
+        "meaning": "POST data"
+      },
+      {
+        "flag": "-H",
+        "meaning": "add header"
+      }
+    ],
+    "examples": [
+      "curl https://example.com",
+      "curl -sL https://example.com -o out.html",
+      "curl -d 'a=b' https://api.example.com"
+    ]
+  },
+  {
+    "name": "ssh",
+    "summary": "OpenSSH client",
+    "description": "Connects to a remote machine and runs commands or opens an interactive shell.",
+    "flags": [
+      {
+        "flag": "-p",
+        "meaning": "port"
+      },
+      {
+        "flag": "-i",
+        "meaning": "identity file"
+      },
+      {
+        "flag": "-l",
+        "meaning": "login name"
+      },
+      {
+        "flag": "-L",
+        "meaning": "local port forward"
+      },
+      {
+        "flag": "-R",
+        "meaning": "remote port forward"
+      },
+      {
+        "flag": "-N",
+        "meaning": "no remote command"
+      }
+    ],
+    "examples": [
+      "ssh user@host",
+      "ssh -i key.pem user@host",
+      "ssh -p 2222 user@host"
+    ]
+  },
+  {
+    "name": "chmod",
+    "summary": "Change file mode bits",
+    "description": "Changes permissions of files or directories. Use symbolic or octal modes.",
+    "flags": [
+      {
+        "flag": "-R",
+        "meaning": "recursive"
+      },
+      {
+        "flag": "-v",
+        "meaning": "verbose"
+      },
+      {
+        "flag": "-c",
+        "meaning": "report changes"
+      },
+      {
+        "flag": "--reference",
+        "meaning": "copy mode from file"
+      }
+    ],
+    "examples": [
+      "chmod 755 script.sh",
+      "chmod +x file",
+      "chmod -R u+rwX,go+rX dir"
+    ]
+  },
+  {
+    "name": "sudo",
+    "summary": "Execute a command as another user",
+    "description": "Runs a command with elevated privileges. Requires authentication.",
+    "flags": [
+      {
+        "flag": "-u",
+        "meaning": "run as user"
+      },
+      {
+        "flag": "-i",
+        "meaning": "login shell"
+      },
+      {
+        "flag": "-s",
+        "meaning": "shell"
+      },
+      {
+        "flag": "-k",
+        "meaning": "reset timestamp"
+      }
+    ],
+    "examples": [
+      "sudo apt update",
+      "sudo systemctl restart nginx",
+      "sudo -u postgres psql"
+    ]
+  },
+  {
+    "name": "python3",
+    "summary": "Python 3 interpreter",
+    "description": "Runs Python scripts or starts the interactive interpreter.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "execute command string"
+      },
+      {
+        "flag": "-m",
+        "meaning": "run module"
+      },
+      {
+        "flag": "-i",
+        "meaning": "interactive after script"
+      },
+      {
+        "flag": "-u",
+        "meaning": "unbuffered stdout/stderr"
+      }
+    ],
+    "examples": [
+      "python3 script.py",
+      "python3 -m http.server 8000",
+      "python3 -c 'print(1)'"
+    ]
+  },
+  {
+    "name": "pip",
+    "summary": "Python package installer",
+    "description": "Installs and manages Python packages from PyPI or other indexes.",
+    "flags": [
+      {
+        "flag": "install",
+        "meaning": "install packages"
+      },
+      {
+        "flag": "uninstall",
+        "meaning": "uninstall packages"
+      },
+      {
+        "flag": "list",
+        "meaning": "list installed"
+      },
+      {
+        "flag": "freeze",
+        "meaning": "output requirements"
+      },
+      {
+        "flag": "--upgrade",
+        "meaning": "upgrade package"
+      }
+    ],
+    "examples": [
+      "pip install requests",
+      "pip install -r requirements.txt",
+      "pip list"
+    ]
+  },
+  {
+    "name": "docker",
+    "summary": "Container runtime",
+    "description": "Builds, runs, and manages containers and images.",
+    "flags": [
+      {
+        "flag": "run",
+        "meaning": "run a command in a new container"
+      },
+      {
+        "flag": "ps",
+        "meaning": "list containers"
+      },
+      {
+        "flag": "build",
+        "meaning": "build an image"
+      },
+      {
+        "flag": "exec",
+        "meaning": "run in running container"
+      },
+      {
+        "flag": "-d",
+        "meaning": "detached mode"
+      }
+    ],
+    "examples": [
+      "docker ps",
+      "docker run -it ubuntu bash",
+      "docker build -t app ."
+    ]
+  },
+  {
+    "name": "kubectl",
+    "summary": "Kubernetes command-line tool",
+    "description": "Controls Kubernetes clusters and manages resources.",
+    "flags": [
+      {
+        "flag": "get",
+        "meaning": "display resources"
+      },
+      {
+        "flag": "apply",
+        "meaning": "apply config"
+      },
+      {
+        "flag": "delete",
+        "meaning": "delete resources"
+      },
+      {
+        "flag": "logs",
+        "meaning": "print logs"
+      },
+      {
+        "flag": "-n",
+        "meaning": "namespace"
+      }
+    ],
+    "examples": [
+      "kubectl get pods",
+      "kubectl apply -f deploy.yaml",
+      "kubectl logs -f pod"
+    ]
+  },
+  {
+    "name": "systemctl",
+    "summary": "Control systemd services",
+    "description": "Manages system services and units. Start, stop, restart, enable, disable.",
+    "flags": [
+      {
+        "flag": "status",
+        "meaning": "show service status"
+      },
+      {
+        "flag": "start",
+        "meaning": "start unit"
+      },
+      {
+        "flag": "stop",
+        "meaning": "stop unit"
+      },
+      {
+        "flag": "restart",
+        "meaning": "restart unit"
+      },
+      {
+        "flag": "enable",
+        "meaning": "enable at boot"
+      },
+      {
+        "flag": "--now",
+        "meaning": "act immediately"
+      }
+    ],
+    "examples": [
+      "systemctl status ssh",
+      "systemctl restart nginx",
+      "systemctl enable --now docker"
+    ]
+  },
+  {
+    "name": "ps",
+    "summary": "Report process status",
+    "description": "Displays information about running processes.",
+    "flags": [
+      {
+        "flag": "-e",
+        "meaning": "select all processes"
+      },
+      {
+        "flag": "-f",
+        "meaning": "full-format listing"
+      },
+      {
+        "flag": "aux",
+        "meaning": "BSD style all processes"
+      },
+      {
+        "flag": "-o",
+        "meaning": "user-defined format"
+      }
+    ],
+    "examples": [
+      "ps aux",
+      "ps -ef",
+      "ps -o pid,comm"
+    ]
+  },
+  {
+    "name": "kill",
+    "summary": "Terminate a process",
+    "description": "Sends a signal to a process by PID. Default signal is TERM.",
+    "flags": [
+      {
+        "flag": "-9",
+        "meaning": "SIGKILL"
+      },
+      {
+        "flag": "-15",
+        "meaning": "SIGTERM"
+      },
+      {
+        "flag": "-l",
+        "meaning": "list signals"
+      },
+      {
+        "flag": "-s",
+        "meaning": "signal name"
+      }
+    ],
+    "examples": [
+      "kill 1234",
+      "kill -9 1234",
+      "kill -TERM 1234"
+    ]
+  },
+  {
+    "name": "mkdir",
+    "summary": "Create directories",
+    "description": "Creates directories, including parents with -p.",
+    "flags": [
+      {
+        "flag": "-p",
+        "meaning": "create parents as needed"
+      },
+      {
+        "flag": "-v",
+        "meaning": "print message"
+      },
+      {
+        "flag": "-m",
+        "meaning": "set mode"
+      }
+    ],
+    "examples": [
+      "mkdir newdir",
+      "mkdir -p a/b/c",
+      "mkdir -p project/src"
+    ]
+  },
+  {
+    "name": "touch",
+    "summary": "Change file timestamps or create empty files",
+    "description": "Updates access/modification times; creates file if missing.",
+    "flags": [
+      {
+        "flag": "-c",
+        "meaning": "do not create file"
+      },
+      {
+        "flag": "-t",
+        "meaning": "use specified time"
+      },
+      {
+        "flag": "-a",
+        "meaning": "change access time only"
+      },
+      {
+        "flag": "-m",
+        "meaning": "change modification time only"
+      }
+    ],
+    "examples": [
+      "touch file.txt",
+      "touch a b c",
+      "touch -t 202401010000 file"
+    ]
+  },
+  {
+    "name": "echo",
+    "summary": "Print text",
+    "description": "Prints its arguments separated by spaces, followed by a newline.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "do not print trailing newline"
+      },
+      {
+        "flag": "-e",
+        "meaning": "enable backslash escapes"
+      },
+      {
+        "flag": "-E",
+        "meaning": "disable escapes"
+      }
+    ],
+    "examples": [
+      "echo hello",
+      "echo -n 'no newline'",
+      "echo $HOME"
+    ]
+  },
+  {
+    "name": "sed",
+    "summary": "Stream editor",
+    "description": "Filters and transforms text line by line using scripts.",
+    "flags": [
+      {
+        "flag": "-i",
+        "meaning": "edit files in place"
+      },
+      {
+        "flag": "-e",
+        "meaning": "add script"
+      },
+      {
+        "flag": "-n",
+        "meaning": "suppress auto-print"
+      },
+      {
+        "flag": "s/old/new/",
+        "meaning": "substitute"
+      }
+    ],
+    "examples": [
+      "sed 's/foo/bar/g' file",
+      "sed -i 's/old/new/' file",
+      "sed -n '1,10p' file"
+    ]
+  },
+  {
+    "name": "awk",
+    "summary": "Pattern-directed text processing",
+    "description": "Processes text by records and fields. Powerful for column extraction.",
+    "flags": [
+      {
+        "flag": "-F",
+        "meaning": "field separator"
+      },
+      {
+        "flag": "-v",
+        "meaning": "assign variable"
+      },
+      {
+        "flag": "{print $1}",
+        "meaning": "print first field"
+      }
+    ],
+    "examples": [
+      "awk '{print $1}' file",
+      "awk -F: '{print $1}' /etc/passwd",
+      "awk 'NR>1' file"
+    ]
+  },
+  {
+    "name": "head",
+    "summary": "Output the first part of files",
+    "description": "Prints the first N lines (default 10) of each file.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "number of lines"
+      },
+      {
+        "flag": "-c",
+        "meaning": "number of bytes"
+      },
+      {
+        "flag": "-q",
+        "meaning": "never print headers"
+      },
+      {
+        "flag": "-v",
+        "meaning": "always print headers"
+      }
+    ],
+    "examples": [
+      "head file.txt",
+      "head -n 20 file",
+      "head -c 100 file"
+    ]
+  },
+  {
+    "name": "tail",
+    "summary": "Output the last part of files",
+    "description": "Prints the last N lines (default 10). Use -f to follow growing files.",
+    "flags": [
+      {
+        "flag": "-n",
+        "meaning": "number of lines"
+      },
+      {
+        "flag": "-f",
+        "meaning": "follow file growth"
+      },
+      {
+        "flag": "-c",
+        "meaning": "number of bytes"
+      },
+      {
+        "flag": "-F",
+        "meaning": "follow with retry"
+      }
+    ],
+    "examples": [
+      "tail file.txt",
+      "tail -n 50 file",
+      "tail -f /var/log/syslog"
+    ]
+  },
+  {
+    "name": "wc",
+    "summary": "Count lines, words, and bytes",
+    "description": "Counts newlines, words, and bytes in files.",
+    "flags": [
+      {
+        "flag": "-l",
+        "meaning": "lines"
+      },
+      {
+        "flag": "-w",
+        "meaning": "words"
+      },
+      {
+        "flag": "-c",
+        "meaning": "bytes"
+      },
+      {
+        "flag": "-m",
+        "meaning": "characters"
+      }
+    ],
+    "examples": [
+      "wc file.txt",
+      "wc -l *.py",
+      "wc -w README.md"
+    ]
+  },
+  {
+    "name": "which",
+    "summary": "Locate a command in PATH",
+    "description": "Prints the path of the executable that would run for the given command name.",
+    "flags": [],
+    "examples": [
+      "which bash",
+      "which python3",
+      "which git"
+    ]
+  }
+]
