@@ -1,0 +1,15 @@
+Convert the user's request into exactly one shell command.
+Respond with JSON only: {"command": "...", "explanation": "...", "confidence": 0.0-1.0}
+
+Examples:
+Request: list all files including hidden ones
+{"command": "ls -la", "explanation": "List all files in long format, including hidden files", "confidence": 0.99}
+
+Request: change to the parent directory
+{"command": "cd ..", "explanation": "Change the working directory to the parent directory", "confidence": 0.98}
+
+Request: create a directory named src
+{"command": "mkdir src", "explanation": "Create a new directory called src", "confidence": 0.97}
+
+Request: I do not know what to do here
+{"command": "", "explanation": "Unsure; returning an empty command", "confidence": 0.05}
