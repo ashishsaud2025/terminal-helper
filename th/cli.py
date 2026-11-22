@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -52,6 +53,14 @@ def cmd_log(args) -> int:
         return 0
 
 
+_ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[a-zA-Z]")
+
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI escape sequences; leave other characters intact."""
+    return _ANSI_RE.sub("", text)
+
+
 def _help_conn():
     p = db_path()
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -65,6 +74,12 @@ def _help_conn():
     return conn
 
 
+def _write(text: str) -> None:
+    if os.environ.get("NO_COLOR"):
+        text = _strip_ansi(text)
+    sys.stdout.write(text)
+
+
 def cmd_help(args) -> int:
     query = " ".join(getattr(args, "query", None) or []).strip()
     conn = _help_conn()
@@ -72,11 +87,11 @@ def cmd_help(args) -> int:
         if not query:
             entries = sorted(helpdb._load_all(conn), key=lambda e: (e.name or "").lower())
             lines = [f"{e.name} \u2014 {e.summary}" for e in entries]
-            sys.stdout.write("\n".join(lines) + ("\n" if lines else ""))
+            _write("\n".join(lines) + ("\n" if lines else ""))
             return 0
         results = helpdb.lookup(conn, query)
         if not results:
-            sys.stdout.write("nothing found \u2014 did you mean: ...\n")
+            _write("nothing found \u2014 did you mean: ...\n")
             return 1
         if len(results) == 1 and results[0].name.lower() == query.lower():
             e = results[0]
@@ -98,13 +113,13 @@ def cmd_help(args) -> int:
                 for ex in e.examples:
                     out.append(f"  {ex}")
                 out.append("")
-            sys.stdout.write("\n".join(out).rstrip() + "\n")
+            _write("\n".join(out).rstrip() + "\n")
             return 0
         out = []
         for e in results:
             out.append(f"{e.name} \u2014 {e.summary}")
             out.append(f"  th help {e.name}")
-        sys.stdout.write("\n".join(out) + "\n")
+        _write("\n".join(out) + "\n")
         return 0
     finally:
         conn.close()

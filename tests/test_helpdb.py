@@ -73,7 +73,7 @@ def test_entry_shape():
     from pathlib import Path
     data = json.loads(Path("th/help_data/commands.json").read_text())
     assert isinstance(data, list)
-    assert len(data) >= 30
+    assert len(data) >= 80
     for e in data:
         assert set(["name", "summary", "description", "flags", "examples"]) <= set(e.keys())
         assert isinstance(e["examples"], list) and len(e["examples"]) >= 1
