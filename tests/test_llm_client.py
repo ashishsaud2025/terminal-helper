@@ -8,6 +8,7 @@ import pytest
 from th.config import Config
 from th.llm import ask, build_system_prompt
 from th.llm.client import CommandReply, validate_command_json
+import th.llm.cli_agent as cli_agent
 import th.llm.ollama as ollama
 
 
@@ -173,6 +174,38 @@ def test_valid_stub_returns_raw_string(monkeypatch):
 def test_unknown_backend_returns_empty():
     cfg = _make_cfg(llm_backend="no-such-backend")
     assert ask("sys", "prompt", config=cfg) == ""
+
+
+class _CliProc:
+    returncode = 0
+    stdout = "ls -la\n"
+
+
+def test_cli_agent_sends_prompt_only(monkeypatch):
+    seen = {}
+
+    def fake_run(args, capture_output=True, text=True, timeout=3.0):
+        seen["args"] = args
+        return _CliProc()
+
+    monkeypatch.setattr("th.llm.cli_agent.subprocess.run", fake_run)
+    cfg = _make_cfg(llm_backend="cli_agent")
+    out = cli_agent.ask("system prompt here", "list files", config=cfg)
+    assert out == "ls -la\n"
+    assert seen["args"] == ["claude", "-p", "--output-format", "text", "list files"]
+
+
+def test_cli_agent_nonzero_returncode_returns_empty(monkeypatch):
+    class _BadProc:
+        returncode = 1
+        stdout = ""
+
+    def fake_run(args, capture_output=True, text=True, timeout=3.0):
+        return _BadProc()
+
+    monkeypatch.setattr("th.llm.cli_agent.subprocess.run", fake_run)
+    cfg = _make_cfg(llm_backend="cli_agent")
+    assert cli_agent.ask("system", "prompt", config=cfg) == ""
 
 
 def test_build_system_prompt_has_instruction_line():
