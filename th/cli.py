@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import re
 import sys
@@ -6,8 +7,13 @@ from pathlib import Path
 
 import sqlite3
 
+from th import config
+from th import context
 from th import db
 from th import helpdb
+from th import llm
+from th import rules
+from th import shells_util
 
 
 def data_dir() -> Path:
@@ -77,7 +83,10 @@ def _help_conn():
 def _write(text: str) -> None:
     if os.environ.get("NO_COLOR"):
         text = _strip_ansi(text)
-    sys.stdout.write(text)
+    try:
+        sys.stdout.write(text)
+    except UnicodeEncodeError:  # e.g. cp1252 console on Windows
+        sys.stdout.buffer.write(text.encode(sys.stdout.encoding or "utf-8", errors="replace"))
 
 
 def cmd_help(args) -> int:
@@ -125,6 +134,167 @@ def cmd_help(args) -> int:
         conn.close()
 
 
+# `th fix`: rules first, LLM second
+
+_NO_RECENT_FAILURE = "th: no recent failure"
+_LLM_DISABLED = "th: no rule-based fix; LLM disabled"
+
+
+def _help_text_for(name: str) -> str:
+    """Flatten the help-db entry for ``name`` into plain text (flags included)."""
+    try:
+        conn = _help_conn()
+    except Exception:
+        return ""
+    try:
+        results = helpdb.lookup(conn, name)
+        if not results or results[0].name.lower() != name.lower():
+            return ""
+        e = results[0]
+        parts: list[str] = []
+        if e.description:
+            parts.append(e.description)
+        if e.summary:
+            parts.append(e.summary)
+        for f in e.flags or []:
+            flag = f.get("flag") if isinstance(f, dict) else str(f)
+            meaning = f.get("meaning", "") if isinstance(f, dict) else ""
+            parts.append(f"{flag} {meaning}".strip())
+        parts.extend(str(ex) for ex in (e.examples or []))
+        return "\n".join(parts)
+    except Exception:
+        return ""
+    finally:
+        conn.close()
+
+
+def _try_rules(cmdline: str, stderr_tail: str, known: list[str]) -> tuple[str, str] | None:
+    """Try the rule-based strategies in order: typo, flag, did-you-mean."""
+    correction = rules.fix_command_typo(cmdline, known)
+    if correction:
+        toks = shells_util.split(cmdline) or [cmdline]
+        first = toks[0] if toks else cmdline
+        rest = toks[1:] if len(toks) > 1 else []
+        command = correction if not rest else correction + " " + " ".join(rest)
+        return command, f"typo: {first} -> {correction}"
+
+    toks = shells_util.split(cmdline) or []
+    if toks:
+        first = toks[0]
+        help_text = _help_text_for(first)
+        for p in rules.check_flags(first, toks[1:], help_text):
+            if not p.suggestion:
+                continue
+            flag = p.message.rsplit("unknown flag: ", 1)[-1] if "unknown flag: " in p.message else ""
+            new_toks: list[str] = [first]
+            replaced = False
+            for t in toks[1:]:
+                head = t.split("=", 1)[0]
+                if not replaced and head == flag:
+                    new_toks.append(p.suggestion + t[len(head):])
+                    replaced = True
+                else:
+                    new_toks.append(t)
+            if replaced:
+                command = " ".join(new_toks)
+                return command, f"unknown flag: {flag}; use {p.suggestion}"
+
+    val = rules.parse_did_you_mean(stderr_tail)
+    if val:
+        toks = shells_util.split(cmdline) or []
+        if len(toks) >= 2:
+            command = toks[0] + " " + val
+            if len(toks) > 2:
+                command += " " + " ".join(toks[2:])
+        else:
+            command = val
+        return command, f"did you mean: {val}"
+
+    return None
+
+
+def _danger_stderr(command: str) -> int:
+    """Print a danger message to stderr and return 3 when command is dangerous."""
+    matches = rules.danger_matches(command)
+    if not matches:
+        return 0
+    d = matches[0]
+    msg = f"th: danger: {command} - {d.detail}"
+    if d.safer:
+        msg += f" (safer: {d.safer})"
+    sys.stderr.write(msg + "\n")
+    return 3
+
+
+def _emit_suggestion(command: str, reason: str, source: str, as_json: bool) -> int:
+    if as_json:
+        _write(json.dumps({"command": command, "reason": reason, "source": source}) + "\n")
+    else:
+        _write(f"{command}\t{reason}\n")
+    return 0
+
+
+def _fix_prompt(bundle: context.ContextBundle, cmdline: str, stderr_tail: str) -> str:
+    lines: list[str] = [
+        f"Failed command: {cmdline}",
+        f"Exit code: {bundle.last_exit_code}",
+        f"OS: {bundle.os}",
+        f"Shell: {bundle.shell}",
+        f"CWD: {bundle.cwd}",
+    ]
+    if stderr_tail:
+        lines.append("Stderr tail:\n" + stderr_tail)
+    if bundle.last_commands:
+        lines.append("Recent commands: " + ", ".join(bundle.last_commands))
+    if bundle.cwd_files:
+        lines.append("CWD files: " + ", ".join(bundle.cwd_files))
+    lines.append(
+        'Suggest exactly one fix as JSON: {"command": "...", "explanation": "...", "confidence": 0.0-1.0}'
+    )
+    return "\n".join(lines)
+
+
+def cmd_fix(args) -> int:
+    cfg = config.load_config()
+    failure = db.last_failure(db_path())
+    if failure is None:
+        sys.stderr.write(_NO_RECENT_FAILURE + "\n")
+        return 1
+
+    cmdline = str(failure["cmd"])
+    exit_code = failure["exit_code"]
+    stderr_tail = failure["stderr_tail"] or ""
+
+    conn = _help_conn()
+    try:
+        known = [e.name for e in helpdb._load_all(conn) if e.name]
+    finally:
+        conn.close()
+
+    suggestion = _try_rules(cmdline, stderr_tail, known)
+    if suggestion is not None:
+        command, reason = suggestion
+        if _danger_stderr(command) == 3:
+            return 3
+        return _emit_suggestion(command, reason, "rules", args.json)
+
+    if not cfg.llm_enabled:
+        sys.stderr.write(_LLM_DISABLED + "\n")
+        return 1
+
+    bundle = context.build_context(cmdline, exit_code, stderr_tail)
+    system = llm.build_system_prompt("bash", "Linux")
+    text = llm.ask(system, _fix_prompt(bundle, cmdline, stderr_tail), config=cfg) or ""
+    reply = llm.validate_command_json(text)
+    if reply is None or not reply.command.strip():
+        if args.verbose:
+            sys.stderr.write("th: no usable fix from LLM\n")
+        return 1
+    if _danger_stderr(reply.command) == 3:
+        return 3
+    return _emit_suggestion(reply.command, reply.explanation.strip() or "llm suggestion", "llm", args.json)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="th")
     sub = parser.add_subparsers(dest="command")
@@ -139,6 +309,11 @@ def build_parser() -> argparse.ArgumentParser:
     help_p = sub.add_parser("help", help="show help for a command")
     help_p.add_argument("query", nargs="*", default=[])
     help_p.set_defaults(func=cmd_help)
+
+    fix_p = sub.add_parser("fix", help="suggest a fix for the last failed command")
+    fix_p.add_argument("--json", action="store_true", default=False)
+    fix_p.add_argument("--verbose", action="store_true", default=False)
+    fix_p.set_defaults(func=cmd_fix)
 
     return parser
 
