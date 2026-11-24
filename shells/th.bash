@@ -60,8 +60,8 @@ __th_describe() {
     __TH_CAND_IDX=""
   fi
 
-  out=$(th describe -- "$READLINE_LINE" 2>/dev/null) || return 0
-  rc=$?
+  out=$(th describe -- "$READLINE_LINE" 2>/dev/null); rc=$?
+  [[ $rc -eq 0 || $rc -eq 4 ]] || return 0
 
   # Single candidate -> replace the buffer with it.
   if [[ $rc -eq 0 && -n "${out:-}" ]]; then
