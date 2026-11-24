@@ -12,6 +12,7 @@ from th import context
 from th import db
 from th import helpdb
 from th import llm
+from th.llm.client import _strip_fences
 from th import rules
 from th import shells_util
 
@@ -139,6 +140,12 @@ def cmd_help(args) -> int:
 _NO_RECENT_FAILURE = "th: no recent failure"
 _LLM_DISABLED = "th: no rule-based fix; LLM disabled"
 
+# `th describe`: English -> command
+
+_DESCRIBE_LLM_DISABLED = "th: English→command needs the LLM; it is disabled. Try: th help <cmd>."
+_DESCRIBE_EMPTY = "th: describe needs an English request. Try: th describe <what you want to do>."
+_DESCRIBE_NO_USABLE = "th: no usable command from LLM"
+
 
 def _help_text_for(name: str) -> str:
     """Flatten the help-db entry for ``name`` into plain text (flags included)."""
@@ -254,6 +261,52 @@ def _fix_prompt(bundle: context.ContextBundle, cmdline: str, stderr_tail: str) -
     return "\n".join(lines)
 
 
+def _describe_prompt(bundle: context.ContextBundle, request: str) -> str:
+    """Build the user prompt for the English -> command LLM request."""
+    lines: list[str] = [
+        f"English request: {request}",
+        f"OS: {bundle.os}",
+        f"Shell: {bundle.shell}",
+        f"CWD: {bundle.cwd}",
+    ]
+    if bundle.last_commands:
+        lines.append("Recent commands: " + ", ".join(bundle.last_commands))
+    if bundle.cwd_files:
+        lines.append("CWD files: " + ", ".join(bundle.cwd_files))
+    lines.append(
+        "Reply with JSON only. If you are confident in exactly one command, reply with a single object: "
+        '{"command": "...", "explanation": "...", "confidence": 0.0-1.0}. '
+        "If you are uncertain, reply with a JSON array of up to 3 candidates, "
+        'each with keys "command", "explanation", "confidence".'
+    )
+    return "\n".join(lines)
+
+
+def _parse_candidates(text: str) -> list[tuple[str, str]]:
+    """Parse the LLM reply into (command, explanation) candidates.
+
+    Accepts a single JSON object or a JSON array of up to 3 objects. Each entry
+    is validated with llm.validate_command_json. Empty/invalid replies yield [].
+    """
+    try:
+        payload = json.loads(_strip_fences(text))
+    except (ValueError, TypeError):
+        return []
+    if isinstance(payload, dict):
+        payload = [payload]
+    if not isinstance(payload, list):
+        return []
+    candidates: list[tuple[str, str]] = []
+    for entry in payload[:3]:
+        if not isinstance(entry, dict):
+            continue
+        reply = llm.validate_command_json(json.dumps(entry))
+        if reply is None or not reply.command.strip():
+            continue
+        candidates.append((reply.command, reply.explanation.strip()))
+    return candidates
+
+
 def cmd_fix(args) -> int:
     cfg = config.load_config()
     failure = db.last_failure(db_path())
@@ -295,6 +348,68 @@ def cmd_fix(args) -> int:
     return _emit_suggestion(reply.command, reply.explanation.strip() or "llm suggestion", "llm", args.json)
 
 
+def cmd_describe(args) -> int:
+    """Convert an English request into a shell command (or up to 3 candidates)."""
+    cfg = config.load_config()
+
+    request = " ".join(getattr(args, "request", None) or []).strip()
+    if not request:
+        sys.stderr.write(_DESCRIBE_EMPTY + "\n")
+        return 1
+
+    if not cfg.llm_enabled:
+        sys.stderr.write(_DESCRIBE_LLM_DISABLED + "\n")
+        return 1
+
+    bundle = context.build_context("", 0, "")
+    system = llm.build_system_prompt("bash", "Linux")
+    system += (
+        "\n\nIf the request is ambiguous, reply with a JSON array of up to 3 candidates; "
+        "otherwise reply with a single JSON object."
+    )
+    text = llm.ask(system, _describe_prompt(bundle, request), config=cfg) or ""
+
+    candidates = _parse_candidates(text)
+    if not candidates:
+        sys.stderr.write(_DESCRIBE_NO_USABLE + "\n")
+        return 1
+
+    scanned = [(cmd, expl, bool(rules.danger_matches(cmd))) for cmd, expl in candidates]
+
+    if args.json:
+        if len(scanned) == 1:
+            cmd, expl, danger = scanned[0]
+            _write(
+                json.dumps({"command": cmd, "explanation": expl, "danger": danger}) + "\n"
+            )
+            return 3 if danger else 0
+        _write(
+            json.dumps(
+                {
+                    "ambiguous": True,
+                    "candidates": [
+                        {"command": cmd, "explanation": expl, "danger": danger}
+                        for cmd, expl, danger in scanned
+                    ],
+                }
+            )
+            + "\n"
+        )
+        return 4
+
+    if len(scanned) == 1:
+        cmd, expl, danger = scanned[0]
+        _write(f"{'! ' if danger else ''}{cmd}\t{expl}\n")
+        return 3 if danger else 0
+
+    lines = [
+        f"{i}) {'! ' if danger else ''}{cmd}\t{expl}"
+        for i, (cmd, expl, danger) in enumerate(scanned, 1)
+    ]
+    _write("\n".join(lines) + "\n")
+    return 4
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="th")
     sub = parser.add_subparsers(dest="command")
@@ -314,6 +429,11 @@ def build_parser() -> argparse.ArgumentParser:
     fix_p.add_argument("--json", action="store_true", default=False)
     fix_p.add_argument("--verbose", action="store_true", default=False)
     fix_p.set_defaults(func=cmd_fix)
+
+    describe_p = sub.add_parser("describe", help="convert an English request into a shell command")
+    describe_p.add_argument("request", nargs="+", help="English description of the command wanted")
+    describe_p.add_argument("--json", action="store_true", default=False)
+    describe_p.set_defaults(func=cmd_describe)
 
     return parser
 
