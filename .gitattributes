@@ -1,0 +1,2 @@
+# Keep shell scripts with LF line endings everywhere (shebangs break with CRLF).
+*.sh text eol=lf

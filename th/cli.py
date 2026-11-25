@@ -3,10 +3,13 @@ import json
 import os
 import re
 import shlex
-import sys
-from pathlib import Path
-
+import shutil
 import sqlite3
+import subprocess
+import sys
+import urllib.request
+from dataclasses import dataclass
+from pathlib import Path
 
 from th import config
 from th import context
@@ -476,6 +479,216 @@ def cmd_describe(args) -> int:
     return 4
 
 
+# `th doctor`: pre-flight health check
+
+_TH_START = "# >>> th >>>"
+_TH_END = "# <<< th <<<"
+_REQUIRED_TABLES = {"commands", "suggestions", "help_cache"}
+
+
+@dataclass
+class DoctorResult:
+    """Outcome of a single `th doctor` probe.
+
+    ``ok`` is the check result; ``fatal`` decides whether a failed check
+    makes `th doctor` exit non-zero. Warn-only checks (Ollama, hotkeys)
+    report ``fatal=False`` so they never fail the command.
+    """
+
+    ok: bool
+    detail: str
+    fatal: bool = True
+
+
+def probe_bash_version() -> DoctorResult:
+    """Check 1: bash >= 4.4 via ``bash --version``."""
+    try:
+        completed = subprocess.run(
+            ["bash", "--version"], capture_output=True, text=True, timeout=10
+        )
+    except OSError:
+        return DoctorResult(False, "bash not found on PATH")
+    if completed.returncode != 0:
+        return DoctorResult(False, "bash --version exited non-zero")
+    first_line = (completed.stdout or "").splitlines()[0] if completed.stdout else ""
+    match = re.search(r"version\s+(\d+)\.(\d+)", first_line)
+    if not match:
+        return DoctorResult(False, "could not parse bash version")
+    major, minor = int(match.group(1)), int(match.group(2))
+    if (major, minor) >= (4, 4):
+        return DoctorResult(True, f"bash {major}.{minor}")
+    return DoctorResult(False, f"bash {major}.{minor} < 4.4")
+
+
+def probe_bashrc_hook(path: Path | None = None) -> DoctorResult:
+    """Check 2: th guarded block in ~/.bashrc and `bash -n` parses."""
+    bashrc = path or (Path.home() / ".bashrc")
+    try:
+        text = bashrc.read_text(encoding="utf-8", errors="replace")
+    except OSError as exc:
+        return DoctorResult(False, f"{bashrc} not readable: {exc}")
+    start = text.find(_TH_START)
+    end = text.find(_TH_END)
+    if start < 0 or end < 0 or start >= end:
+        return DoctorResult(False, f"th guarded block not found in {bashrc}")
+    completed = subprocess.run(
+        ["bash", "-n", str(bashrc)], capture_output=True, text=True, timeout=10
+    )
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout or "").strip()
+        return DoctorResult(False, f"{bashrc} fails `bash -n`: {detail}")
+    return DoctorResult(True, f"hook present and {bashrc} parses (`bash -n`)")
+
+
+def probe_data_dir(directory: Path | None = None) -> DoctorResult:
+    """Check 3: data dir writable and db schema current via ``init_db``."""
+    directory = directory or data_dir()
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        writable_check = directory / ".th_write_probe"
+        writable_check.write_text("ok", encoding="utf-8")
+        writable_check.unlink()
+    except OSError as exc:
+        return DoctorResult(False, f"data dir not writable ({directory}): {exc}")
+    dbp = directory / "th.db"
+    try:
+        db.init_db(dbp)
+        conn = sqlite3.connect(str(dbp))
+        try:
+            tables = {str(row[0]) for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )}
+        finally:
+            conn.close()
+    except Exception as exc:
+        return DoctorResult(False, f"init_db failed: {exc}")
+    missing = sorted(_REQUIRED_TABLES - tables)
+    if missing:
+        return DoctorResult(False, f"schema missing tables: {missing}")
+    return DoctorResult(True, f"writable, schema current ({dbp})")
+
+
+def probe_config(config_path: Path | None = None) -> DoctorResult:
+    """Check 4: config loads (defaults OK) with backend reported."""
+    try:
+        cfg = config.load_config(config_path)
+    except Exception as exc:
+        return DoctorResult(False, f"config load failed: {exc}")
+    return DoctorResult(True, f"parses (defaults OK) - backend: {cfg.llm_backend}")
+
+
+def probe_ollama(cfg=None) -> DoctorResult:
+    """Check 5: Ollama reachable + model in /api/tags. Warn-only, never fatal."""
+    if cfg is None:
+        cfg = config.load_config()
+    if not cfg.llm_enabled:
+        return DoctorResult(True, "LLM disabled (rules-only mode)", fatal=False)
+    url = cfg.llm_ollama_url.rstrip("/") + "/api/tags"
+    try:
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+            if resp.status >= 300:
+                raise RuntimeError(f"HTTP {resp.status}")
+    except Exception:
+        return DoctorResult(
+            False,
+            f"Ollama not reachable at {url} - "
+            "WSL->Windows hint: set [wsl2] networkingMode=mirrored in "
+            "%USERPROFILE%\\.wslconfig, then run `wsl --shutdown`",
+            fatal=False,
+        )
+    try:
+        data = json.loads(body)
+    except ValueError:
+        return DoctorResult(False, "Ollama /api/tags returned invalid JSON", fatal=False)
+    models = data.get("models", []) if isinstance(data, dict) else []
+    names = [
+        str(m.get("name", ""))
+        for m in models
+        if isinstance(m, dict) and m.get("name")
+    ]
+    target = cfg.llm_model
+    if any(name == target or name.startswith(target + ":") for name in names):
+        return DoctorResult(True, f"reachable, model {target} in /api/tags")
+    listed = ", ".join(names) if names else "none"
+    return DoctorResult(
+        False,
+        f"model {target} not in /api/tags ({listed})",
+        fatal=False,
+    )
+
+
+def probe_th_on_path() -> DoctorResult:
+    """Check 6: `th` discoverable on PATH via shutil.which."""
+    found = shutil.which("th")
+    if found:
+        return DoctorResult(True, f"th on PATH ({found})")
+    return DoctorResult(False, "th not found on PATH")
+
+
+def probe_hotkey_collision(inputrc: Path | None = None) -> DoctorResult:
+    """Check 7: best-effort ~/.inputrc grep for th hotkeys. Never fatal."""
+    cfg = config.load_config()
+    hotkeys = {cfg.hotkey_fix, cfg.hotkey_check, cfg.hotkey_describe}
+    path = inputrc or (Path.home() / ".inputrc")
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return DoctorResult(True, f"no {path} (nothing to collide with)", fatal=False)
+    hits = sorted({hk for hk in hotkeys if hk and hk in text})
+    if hits:
+        return DoctorResult(
+            False, f"possible hotkey collision in {path}: {', '.join(hits)}", fatal=False
+        )
+    return DoctorResult(True, f"no hotkey collisions in {path}", fatal=False)
+
+
+# (name, probe attribute name, fatal); probes resolved via globals() in
+# cmd_doctor so tests can monkeypatch th.cli.probe_* individually.
+_DOCTOR_CHECKS = (
+    ("bash >= 4.4", "probe_bash_version", True),
+    ("~/.bashrc hook", "probe_bashrc_hook", True),
+    ("data dir + schema", "probe_data_dir", True),
+    ("config", "probe_config", True),
+    ("Ollama model", "probe_ollama", False),
+    ("th on PATH", "probe_th_on_path", True),
+    ("hotkey collision", "probe_hotkey_collision", False),
+)
+
+
+def _doctor_token(result: DoctorResult) -> str:
+    if result.ok:
+        return "[ok]"
+    return "[warn]" if not result.fatal else "[fail]"
+
+
+def cmd_doctor(args) -> int:
+    """Run all health checks and report one line per check.
+
+    Every probe runs even if an earlier one fails; the exit code is 0 iff
+    all fatal checks pass. Probes are module-level functions so tests can
+    monkeypatch ``th.cli.probe_<name>`` without mutating ~/.bashrc or the
+    network.
+    """
+    results = []
+    for name, probe_name, fatal in _DOCTOR_CHECKS:
+        probe = globals()[probe_name]
+        try:
+            result = probe()
+        except Exception as exc:
+            result = DoctorResult(False, f"probe raised {exc!r}", fatal=fatal)
+        if not isinstance(result, DoctorResult):
+            result = DoctorResult(False, "probe returned invalid result", fatal=fatal)
+        results.append((name, result, fatal))
+
+    for name, result, _fatal in results:
+        _write(f"{_doctor_token(result)} {name} - {result.detail}\n")
+
+    failures = [result for _name, result, fatal in results if fatal and not result.ok]
+    return 1 if failures else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="th")
     sub = parser.add_subparsers(dest="command")
@@ -506,6 +719,9 @@ def build_parser() -> argparse.ArgumentParser:
     describe_p.add_argument("request", nargs="+", help="English description of the command wanted")
     describe_p.add_argument("--json", action="store_true", default=False)
     describe_p.set_defaults(func=cmd_describe)
+
+    doctor_p = sub.add_parser("doctor", help="run pre-flight health checks")
+    doctor_p.set_defaults(func=cmd_doctor)
 
     return parser
 

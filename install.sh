@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Check bash version >= 4.4
+# Terminal Helper installer.
+#
+# 1. Requires bash >= 4.4 (buffer hotkeys need bind -x + READLINE_LINE).
+# 2. Pip-installs the package editable, user scope (pip install --user -e .).
+# 3. Appends the th hook block (sourcing shells/th.bash) to ~/.bashrc.
+#    Idempotent: re-running replaces the existing block, never duplicates it.
+
+# 1. bash >= 4.4
 bash_major_minor=$(bash --version | head -1 | sed -E 's/.*version ([0-9]+)\.([0-9]+).*/\1.\2/')
 bash_major=${bash_major_minor%%.*}
 bash_minor=${bash_major_minor##*.}
@@ -10,23 +17,20 @@ if [ "$bash_major" -lt 4 ] || { [ "$bash_major" -eq 4 ] && [ "$bash_minor" -lt 4
   exit 1
 fi
 
-# Resolve script dir
+# 2. pip-install (editable, user scope)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Install package
-if command -v pipx >/dev/null 2>&1; then
-  pipx install -e "$SCRIPT_DIR" >/dev/null 2>&1 || pipx reinstall th >/dev/null 2>&1 || true
-else
-  python3 -m pip install --user -e "$SCRIPT_DIR"
+if ! python3 -m pip install --user -e "$SCRIPT_DIR"; then
+  echo "th: pip install failed" >&2
+  exit 1
 fi
 
-# Append guarded block to ~/.bashrc (idempotent)
+# 3. Append guarded block sourcing shells/th.bash to ~/.bashrc (idempotent)
 BASHRC="${HOME}/.bashrc"
 touch "$BASHRC"
 START="# >>> th >>>"
 END="# <<< th <<<"
 if grep -qF "$START" "$BASHRC"; then
-  # remove existing block
+  # remove existing block so re-runs stay idempotent
   python3 - "$BASHRC" "$START" "$END" <<'PY'
 import sys
 path, start, end = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -52,5 +56,7 @@ fi
   echo "$END"
 } >> "$BASHRC"
 
-echo "th installed. Open a new shell or 'source ~/.bashrc'."
-echo "Data dir: ${TH_DATA_DIR:-$HOME/.local/share/th}"
+echo "th installed."
+echo "  - Restart your shell or run: source ~/.bashrc"
+echo "  - Verify with: th doctor"
+echo "  - Data dir: ${TH_DATA_DIR:-$HOME/.local/share/th}"

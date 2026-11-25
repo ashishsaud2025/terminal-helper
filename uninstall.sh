@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Terminal Helper uninstaller.
+#
+# Removes only the th guarded block from ~/.bashrc (between
+# "# >>> th >>>" and "# <<< th <<<"); never touches any other
+# ~/.bashrc content. With --purge, also deletes the th data dir.
+# The pip-installed package itself is left in place.
+
 BASHRC="${HOME}/.bashrc"
 START="# >>> th >>>"
 END="# <<< th <<<"
@@ -24,6 +31,8 @@ for ln in lines:
 open(path, "w").write("".join(out))
 PY
   echo "Removed th block from $BASHRC."
+else
+  echo "No th block found in $BASHRC."
 fi
 
 if [ "${1:-}" = "--purge" ]; then
@@ -31,4 +40,4 @@ if [ "${1:-}" = "--purge" ]; then
   echo "Purged data dir."
 fi
 
-echo "Uninstall complete. (Package itself left installed; remove with pip/pipx if desired.)"
+echo "Uninstall complete. (Remove the package itself with: pip uninstall terminal-helper)"
