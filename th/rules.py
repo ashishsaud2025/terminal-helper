@@ -216,6 +216,19 @@ def check_flags(cmd: str, args: list[str], help_text: str) -> list[Problem]:
     return problems
 
 
+def _looks_like_path(token: str) -> bool:
+    """True if ``token`` looks like a filesystem path rather than a bare word.
+
+    Heuristic: contains a directory separator (``/``, ``\``), a dot (``.``),
+    or starts with ``./`` or ``~/``. Bare words such as ``TODO`` in
+    ``grep TODO .`` are left alone.
+    """
+    return (
+        "/" in token or "\\" in token or "." in token
+        or token.startswith("./") or token.startswith("~/")
+    )
+
+
 def check_paths(args: list[str]) -> list[Problem]:
     problems: list[Problem] = []
     for arg in args or []:
@@ -224,6 +237,8 @@ def check_paths(args: list[str]) -> list[Problem]:
         if arg == "-" or arg == "--" or arg.startswith("-"):
             continue
         if "://" in arg:
+            continue
+        if not _looks_like_path(arg):
             continue
         path = os.path.expanduser(arg)
         if os.path.exists(path):
@@ -234,7 +249,7 @@ def check_paths(args: list[str]) -> list[Problem]:
 
 # Commands whose non-flag arguments are expected to name existing paths.
 _FILE_COMMANDS = frozenset(
-    {"ls", "cat", "cp", "mv", "rm", "grep", "find", "tar", "chmod", "chown", "source", "."}
+    {"ls", "cat", "cp", "mv", "rm", "grep", "find", "tar", "chmod", "chown", "source"}
 )
 
 

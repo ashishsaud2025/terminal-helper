@@ -8,6 +8,7 @@ import sqlite3
 import subprocess
 import sys
 import urllib.request
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,10 +39,9 @@ def _tail_file(path: str, n: int = 40) -> str:
         return ""
     try:
         with p.open("r", errors="replace") as f:
-            lines = f.readlines()
+            tail = deque(f, maxlen=n)
     except OSError:
         return ""
-    tail = lines[-n:]
     return "".join(tail)
 
 
@@ -208,6 +208,7 @@ def cmd_help(args) -> int:
 
 _NO_RECENT_FAILURE = "th: no recent failure"
 _LLM_DISABLED = "th: no rule-based fix; LLM disabled"
+_DEFAULT_CONFIDENCE_THRESHOLD = 0.5
 
 # `th describe`: English -> command
 
@@ -351,11 +352,15 @@ def _describe_prompt(bundle: context.ContextBundle, request: str) -> str:
     return "\n".join(lines)
 
 
-def _parse_candidates(text: str) -> list[tuple[str, str]]:
+def _parse_candidates(
+    text: str, threshold: float = _DEFAULT_CONFIDENCE_THRESHOLD
+) -> list[tuple[str, str]]:
     """Parse the LLM reply into (command, explanation) candidates.
 
     Accepts a single JSON object or a JSON array of up to 3 objects. Each entry
-    is validated with llm.validate_command_json. Empty/invalid replies yield [].
+    is validated with llm.validate_command_json. Entries below ``threshold``
+    confidence are dropped (global constraint: low confidence => show nothing).
+    Empty/invalid replies yield [].
     """
     try:
         payload = json.loads(_strip_fences(text))
@@ -371,6 +376,8 @@ def _parse_candidates(text: str) -> list[tuple[str, str]]:
             continue
         reply = llm.validate_command_json(json.dumps(entry))
         if reply is None or not reply.command.strip():
+            continue
+        if reply.confidence < threshold:
             continue
         candidates.append((reply.command, reply.explanation.strip()))
     return candidates
@@ -412,6 +419,14 @@ def cmd_fix(args) -> int:
         if args.verbose:
             sys.stderr.write("th: no usable fix from LLM\n")
         return 1
+    threshold = getattr(cfg, "llm_confidence_threshold", _DEFAULT_CONFIDENCE_THRESHOLD)
+    if reply.confidence < threshold:
+        if args.verbose:
+            sys.stderr.write(
+                f"th: fix confidence {reply.confidence:.2f} below threshold "
+                f"{threshold:.2f}; showing nothing\n"
+            )
+        return 1
     if _danger_stderr(reply.command) == 3:
         return 3
     return _emit_suggestion(reply.command, reply.explanation.strip() or "llm suggestion", "llm", args.json)
@@ -438,7 +453,8 @@ def cmd_describe(args) -> int:
     )
     text = llm.ask(system, _describe_prompt(bundle, request), config=cfg) or ""
 
-    candidates = _parse_candidates(text)
+    threshold = getattr(cfg, "llm_confidence_threshold", _DEFAULT_CONFIDENCE_THRESHOLD)
+    candidates = _parse_candidates(text, threshold)
     if not candidates:
         sys.stderr.write(_DESCRIBE_NO_USABLE + "\n")
         return 1

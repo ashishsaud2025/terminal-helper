@@ -30,6 +30,7 @@ class Config:
     llm_timeout_s: float = 3.0
     preflight_on_enter: bool = False
     history_limit: int = 5
+    llm_confidence_threshold: float = 0.5
     hotkey_fix: str = _DEFAULT_HOTKEY_FIX
     hotkey_check: str = _DEFAULT_HOTKEY_CHECK
     hotkey_describe: str = _DEFAULT_HOTKEY_DESCRIBE
@@ -78,6 +79,7 @@ def _default_values() -> dict[str, Any]:
         "llm_timeout_s": 3.0,
         "preflight_on_enter": False,
         "history_limit": 5,
+        "llm_confidence_threshold": 0.5,
         "hotkey_fix": _DEFAULT_HOTKEY_FIX,
         "hotkey_check": _DEFAULT_HOTKEY_CHECK,
         "hotkey_describe": _DEFAULT_HOTKEY_DESCRIBE,
@@ -104,6 +106,8 @@ def _extract(raw: dict[str, Any]) -> dict[str, Any]:
             out["llm_timeout_s"] = llm.get("timeout_s")
         elif "timeout" in llm:
             out["llm_timeout_s"] = llm.get("timeout")
+        if "confidence_threshold" in llm:
+            out["llm_confidence_threshold"] = llm.get("confidence_threshold")
 
     history = raw.get("history")
     if isinstance(history, dict):
@@ -135,7 +139,8 @@ def _extract(raw: dict[str, Any]) -> dict[str, Any]:
 
     flat_keys = (
         "llm_enabled", "llm_backend", "llm_model", "llm_ollama_url",
-        "llm_timeout_s", "preflight_on_enter", "history_limit",
+        "llm_timeout_s", "llm_confidence_threshold",
+        "preflight_on_enter", "history_limit",
         "hotkey_fix", "hotkey_check", "hotkey_describe",
     )
     for key in flat_keys:
@@ -167,6 +172,11 @@ def _apply_value(values: dict[str, Any], key: str, value: Any) -> None:
             values[key] = value
         elif isinstance(value, float) and value.is_integer():
             values[key] = int(value)
+    elif key == "llm_confidence_threshold":
+        if isinstance(value, bool):
+            return
+        if isinstance(value, (int, float)):
+            values[key] = float(value)
 
 
 def load_config(path: Path | None = None) -> Config:
@@ -209,6 +219,7 @@ def load_config(path: Path | None = None) -> Config:
         llm_timeout_s=values["llm_timeout_s"],
         preflight_on_enter=values["preflight_on_enter"],
         history_limit=values["history_limit"],
+        llm_confidence_threshold=values["llm_confidence_threshold"],
         hotkey_fix=values["hotkey_fix"],
         hotkey_check=values["hotkey_check"],
         hotkey_describe=values["hotkey_describe"],

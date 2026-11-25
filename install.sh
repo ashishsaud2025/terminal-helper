@@ -50,6 +50,11 @@ open(path, "w").write("".join(out))
 PY
 fi
 
+# ~/.bashrc may lack a trailing newline; ensure the guarded block starts on
+# its own line so it never concatenates onto the previous line.
+if [ -s "$BASHRC" ] && [ "$(tail -c 1 "$BASHRC")" != "" ]; then
+  echo >> "$BASHRC"
+fi
 {
   echo "$START"
   echo "source \"$SCRIPT_DIR/shells/th.bash\""

@@ -42,8 +42,11 @@ def _replace_value(match: re.Match[str], value_group: int | None) -> str:
 def redact(text: str) -> str:
     """Return ``text`` with secret values replaced by ``[REDACTED]``.
 
-    Key names / prefixes are preserved. Empty or falsy input is returned as-is.
+    Key names / prefixes are preserved. ``None`` returns ``""``; empty or
+    falsy input is returned as-is.
     """
+    if text is None:
+        return ""
     if not text:
         return text
     result = text

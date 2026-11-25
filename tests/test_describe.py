@@ -79,7 +79,7 @@ def test_describe_three_candidates_rc4(monkeypatch, tmp_path, capsys):
             [
                 {"command": "ls -la", "explanation": "list all files", "confidence": 0.6},
                 {"command": "ls", "explanation": "list files", "confidence": 0.5},
-                {"command": "find .", "explanation": "find all files", "confidence": 0.4},
+                {"command": "find .", "explanation": "find all files", "confidence": 0.5},
             ]
         ),
     )

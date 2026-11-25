@@ -48,7 +48,7 @@ verify the installation.
 
 `uninstall.sh` removes only the guarded block; it never touches any other
 `~/.bashrc` content. The pip-installed package itself is left in place;
-remove it with `pip uninstall terminal-helper` (or `pipx uninstall th`) if
+remove it with `pip uninstall terminal-helper` (or `pip uninstall th`) if
 desired.
 
 ## Requirements

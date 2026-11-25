@@ -81,6 +81,6 @@ def test_benign_text_unchanged():
 
 
 def test_redact_is_idempotent_and_never_crashes():
-    assert redact.redact(None) is None
+    assert redact.redact(None) == ""
     for text in ("password=s3cr3t", "AKIAIOSFODNN7EXAMPLE", "ghp_" + "z" * 40):
         assert redact.redact(redact.redact(text)) == redact.redact(text)
