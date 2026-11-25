@@ -110,3 +110,15 @@ def test_fix_empty_db_no_recent_failure(tmp_path, monkeypatch, capsys):
     rc = _run(tmp_path, monkeypatch)
     assert rc == 1
     assert capsys.readouterr().out == ""
+
+
+def test_fix_rule_suggestion_danger_exit3(tmp_path, monkeypatch, capsys):
+    # "rmm" is a typo for "rm"; the corrected "rm -rf /" is dangerous and must
+    # be blocked before it reaches the buffer.
+    _seed(tmp_path, monkeypatch, "rmm -rf /", 127, "rmm: command not found")
+    rc = _run(tmp_path, monkeypatch)
+    assert rc == 3
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "danger" in captured.err.lower()
+    assert "rm -rf" in captured.err

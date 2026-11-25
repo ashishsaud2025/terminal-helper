@@ -2,6 +2,8 @@ import sqlite3
 import time
 from pathlib import Path
 
+from th import redact
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS commands (
     id INTEGER PRIMARY KEY,
@@ -58,7 +60,7 @@ def record_command(db_path: Path, *, cmd: str, cwd: str, exit_code: int, stderr_
         conn.executescript(SCHEMA)
         cur = conn.execute(
             "INSERT INTO commands (ts, cmd, cwd, exit_code, stderr_tail) VALUES (?, ?, ?, ?, ?)",
-            (time.time(), trimmed, cwd, int(exit_code), stderr_tail or ""),
+            (time.time(), trimmed, cwd, int(exit_code), redact.redact(stderr_tail or "")),
         )
         conn.commit()
         return cur.lastrowid

@@ -5,7 +5,11 @@ from __future__ import annotations
 import os
 import re
 import shlex
+import shutil
+import sqlite3
+import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Container, Iterable
 
 
@@ -225,6 +229,111 @@ def check_paths(args: list[str]) -> list[Problem]:
         if os.path.exists(path):
             continue
         problems.append(Problem(kind="path", message=f"path does not exist: {arg}", suggestion=None))
+    return problems
+
+
+# Commands whose non-flag arguments are expected to name existing paths.
+_FILE_COMMANDS = frozenset(
+    {"ls", "cat", "cp", "mv", "rm", "grep", "find", "tar", "chmod", "chown", "source", "."}
+)
+
+
+def _fetch_help_text(cmd: str) -> str:
+    """Fetch ``cmd --help`` (slow path; only used when ``TH_CHECK_ONLINE=1``)."""
+    try:
+        proc = subprocess.run([cmd, "--help"], capture_output=True, text=True, timeout=2.5)
+    except Exception:
+        return ""
+    return (proc.stdout or "") + "\n" + (proc.stderr or "")
+
+
+def _accepted_fix_in_db(db_path, normalized: str) -> bool:
+    """True if an accepted suggestion for ``normalized`` exists in the db."""
+    path = Path(db_path)
+    if not path.exists():
+        return False
+    try:
+        conn = sqlite3.connect(str(path))
+        try:
+            row = conn.execute(
+                "SELECT 1 FROM suggestions WHERE accepted = 1 AND input = ? LIMIT 1",
+                (normalized,),
+            ).fetchone()
+            return row is not None
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return False
+
+
+def preflight(
+    cmdline: str,
+    *,
+    known_commands: Container[str],
+    db_path,
+    history: list[str],
+    help_texts: dict[str, str],
+) -> list[Problem]:
+    """Pre-flight check of a command line. All static, no network by default.
+
+    Order: (a) split pipeline; (b) command existence (``shutil.which`` /
+    ``known_commands``); (c) path args for file-reading commands;
+    (d) flags against cached ``--help``; (e) history recall; (f) danger scan.
+    Returns a list of :class:`Problem` warnings (never raises).
+    """
+    problems: list[Problem] = []
+    segments = split_pipeline(cmdline)
+    if not segments:
+        return []
+
+    danger_problems: list[Problem] = []
+    for seg in segments:
+        try:
+            toks = shlex.split(seg, posix=True)
+        except ValueError:
+            return []
+        if not toks:
+            continue
+        cmd = toks[0]
+        args = toks[1:]
+
+        exists = shutil.which(cmd) is not None or cmd in known_commands
+        if not exists:
+            correction = fix_command_typo(cmd, known_commands)
+            if correction:
+                problems.append(
+                    Problem(kind="typo", message=f"{cmd} -> {correction}", suggestion=correction)
+                )
+        else:
+            if cmd in _FILE_COMMANDS:
+                problems.extend(check_paths(args))
+            help_text = help_texts.get(cmd, "")
+            if help_text:
+                problems.extend(check_flags(cmd, args, help_text))
+            elif os.environ.get("TH_CHECK_ONLINE") == "1":
+                fetched = _fetch_help_text(cmd)
+                if fetched:
+                    problems.extend(check_flags(cmd, args, fetched))
+
+        for d in danger_matches(seg):
+            danger_problems.append(
+                Problem(
+                    kind="danger",
+                    message=f"{seg} - {d.detail}",
+                    suggestion=d.safer,
+                )
+            )
+
+    normalized = normalize_cmd(cmdline)
+    if normalized and normalized in history and not _accepted_fix_in_db(db_path, normalized):
+        problems.append(
+            Problem(
+                kind="history",
+                message=f"previously failed without an accepted fix: {cmdline}",
+            )
+        )
+
+    problems.extend(danger_problems)
     return problems
 
 

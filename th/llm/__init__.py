@@ -16,6 +16,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from pathlib import Path
 
+from th import redact
 from th.config import Config
 
 from th.llm.client import CommandReply, validate_command_json
@@ -76,6 +77,8 @@ def ask(
         backend = _BACKENDS.get(cfg.llm_backend)
         if backend is None:
             return iter(()) if stream else ""
+        if cfg.llm_backend != "ollama":            system = redact.redact(system)
+            prompt = redact.redact(prompt)
         result = backend.ask(system, prompt, stream=stream, config=cfg)
     except Exception:
         return iter(()) if stream else ""

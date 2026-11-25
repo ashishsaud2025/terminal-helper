@@ -37,6 +37,17 @@ __th_fix() {
   READLINE_POINT=${#READLINE_LINE}
 }
 
+__th_check() {
+  local out line
+  # Pre-flight check the current buffer without executing it, print findings
+  # as dim text, and never modify the buffer.
+  out=$(th check -- "$READLINE_LINE" 2>/dev/null) || return 0
+  [[ -n "${out:-}" ]] || return 0
+  while IFS= read -r line; do
+    [[ -n $line ]] && printf '\e[2mth check: %s\e[0m\n' "$line"
+  done <<< "$out"
+}
+
 __th_describe() {
   local out rc line cmd
   local -a cands=()
@@ -100,6 +111,10 @@ bind -x "${TH_HOTKEY_FIX:-\"\e\C-f\"}":__th_fix 2>/dev/null || true
 # Hotkey: Ctrl+G (overridable via TH_HOTKEY_DESCRIBE). Cycles through ambiguous
 # candidates on repeat presses via __TH_CANDIDATES/__TH_CAND_IDX.
 bind -x "${TH_HOTKEY_DESCRIBE:-\"\C-g\"}":__th_describe 2>/dev/null || true
+
+# Hotkey: Ctrl+Alt+C (overridable via TH_HOTKEY_CHECK). Pre-flight check the
+# current buffer; findings are shown as dim text, the buffer is never modified.
+bind -x "${TH_HOTKEY_CHECK:-\"\e\C-c\"}":__th_check 2>/dev/null || true
 
 trap '__th_preexec' DEBUG
 PROMPT_COMMAND="__th_precmd${PROMPT_COMMAND:+;$PROMPT_COMMAND}"

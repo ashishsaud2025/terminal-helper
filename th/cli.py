@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -58,6 +59,71 @@ def cmd_log(args) -> int:
     except Exception as e:
         sys.stderr.write(f"th: warning: {e}\n")
         return 0
+
+
+def _known_commands(conn) -> set[str]:
+    """Union of help-db command names and executable names found on PATH."""
+    known = {e.name for e in helpdb._load_all(conn) if e.name}
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        try:
+            with os.scandir(directory) as it:
+                for entry in it:
+                    try:
+                        if entry.is_file(follow_symlinks=False):
+                            known.add(entry.name)
+                    except OSError:
+                        continue
+        except OSError:
+            continue
+    return known
+
+
+def cmd_check(args) -> int:
+    """Pre-flight check a command line without executing it.
+
+    Prints one line per finding and exits 10 when warnings were found, 0
+    when the command line is clean. All checks are static (no network
+    unless ``TH_CHECK_ONLINE=1``).
+    """
+    cfg = config.load_config()
+    cmdline = " ".join(args.cmdline)
+
+    dbp = db_path()
+    conn = _help_conn()
+    try:
+        known = _known_commands(conn)
+    finally:
+        conn.close()
+
+    segments = rules.split_pipeline(cmdline)
+    help_texts: dict[str, str] = {}
+    for seg in segments:
+        try:
+            toks = shlex.split(seg, posix=True)
+        except ValueError:
+            toks = []
+        if not toks:
+            continue
+        name = toks[0]
+        if name not in help_texts:
+            help_texts[name] = _help_text_for(name)
+
+    history = [
+        rules.normalize_cmd(str(r["cmd"]))
+        for r in db.recent_commands(dbp, cfg.history_limit)
+        if int(r["exit_code"]) != 0
+    ]
+
+    problems = rules.preflight(
+        cmdline,
+        known_commands=known,
+        db_path=dbp,
+        history=history,
+        help_texts=help_texts,
+    )
+    for p in problems:
+        _write(f"{p.kind}: {p.message}\n")
+    return 10 if problems else 0
 
 
 _ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[a-zA-Z]")
@@ -429,6 +495,12 @@ def build_parser() -> argparse.ArgumentParser:
     fix_p.add_argument("--json", action="store_true", default=False)
     fix_p.add_argument("--verbose", action="store_true", default=False)
     fix_p.set_defaults(func=cmd_fix)
+
+    check_p = sub.add_parser(
+        "check", help="pre-flight check a command line without executing it"
+    )
+    check_p.add_argument("cmdline", nargs="+", help="command line to check")
+    check_p.set_defaults(func=cmd_check)
 
     describe_p = sub.add_parser("describe", help="convert an English request into a shell command")
     describe_p.add_argument("request", nargs="+", help="English description of the command wanted")

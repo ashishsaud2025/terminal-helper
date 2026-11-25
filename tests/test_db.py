@@ -56,3 +56,18 @@ def test_logging_empty_command_skipped(tmp_path):
     assert rc == -1
     rows = db.recent_commands(p, 10)
     assert rows == []
+
+
+def test_record_command_redacts_stderr_tail(tmp_path):
+    p = tmp_path / "t.db"
+    db.init_db(p)
+    db.record_command(
+        p,
+        cmd="x",
+        cwd="/",
+        exit_code=1,
+        stderr_tail="AKIAIOSFODNN7EXAMPLE and password=hunter2",
+    )
+    rows = db.recent_commands(p, 10)
+    assert len(rows) == 1
+    assert rows[0]["stderr_tail"] == "[REDACTED] and password=[REDACTED]"
