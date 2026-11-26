@@ -77,7 +77,8 @@ def ask(
         backend = _BACKENDS.get(cfg.llm_backend)
         if backend is None:
             return iter(()) if stream else ""
-        if cfg.llm_backend != "ollama":            system = redact.redact(system)
+        if cfg.llm_backend != "ollama":
+            system = redact.redact(system)
             prompt = redact.redact(prompt)
         result = backend.ask(system, prompt, stream=stream, config=cfg)
     except Exception:
